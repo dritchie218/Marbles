@@ -26,6 +26,8 @@ jobs:
           node-version: 22
       - name: Run game simulation tests
         run: npm test
+      - name: Generate app icons
+        run: npm run icons
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site

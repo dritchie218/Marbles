@@ -2,6 +2,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Marbles</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#26104a">
+<meta name="apple-mobile-web-app-title" content="Marbles">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <style>
 :root{--bg:#f6f1e7;--fg:#2b2118;--board:#e2b36e;--hole:#5a3a17;--card:#fffdf8;--bd:#cdbfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1812;--fg:#f1e8da;--board:#9a6f3a;--hole:#2b1a08;--card:#2e261d;--bd:#51443a}}
@@ -145,5 +150,6 @@ $('hand').innerHTML=hands[0].map((c,i)=>`<button class="card${i==sel?' on':''}" 
 $('log').innerHTML=log.slice(0,40).map(e=>`<div><i style="background:${COL[e.p]}"></i>${e.t}</div>`).join('');
 $('st').textContent=over?msg:turn?NAME[turn]+' is playing…':pend?`Now move another marble ${pend.rem.t=='f'?'forward':'back'} ${pend.rem.n}.`:noMoves()?'No legal move. Tap a card to discard it.':sel==null?(stuck[0]>=3?'Any card brings a marble out. ':'')+'Your turn: pick a card.':selPeg?'Tap where to go.':'Tap a pulsing marble.';
 $('lg').textContent=over?'':sel!=null&&!turn&&!pend&&!selPeg?'Dashed rings show every landing spot. Red sends an opponent back to start; green sends your partner to their home gate.':msg}
+if(typeof navigator!='undefined'&&'serviceWorker'in navigator&&location.protocol=='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 init();
 </script></body></html>
