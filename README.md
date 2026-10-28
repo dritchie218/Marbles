@@ -19,6 +19,8 @@ Open the link on your phone, then:
 - **iPhone (Safari):** Share → **Add to Home Screen**
 - **Android (Chrome):** tap **Install** when offered, or menu (⋮) → **Add to Home screen**
 
+The game also links a printable one-page guide with these steps and a QR code: [Marbles-Home-Screen-Directions.pdf](https://dritchie218.github.io/Marbles/Marbles-Home-Screen-Directions.pdf).
+
 It gets its own purple & gold icon, opens full screen, and works offline. Updates arrive automatically the next time it is opened with a connection. Playing in the browser without installing works exactly the same.
 
 ## Run it locally
@@ -35,7 +37,7 @@ Plays full simulated games on 4 and 6 player boards, with every skin, and checks
 
 ## App icons
 
-`tools/make-icons.js` draws the icons (`npm run icons`) into `icons/`. They are generated during deployment, so they are not stored in the repository.
+`tools/make-icons.js` draws the icons (`npm run icons`) into `icons/`. They are generated during deployment, so they are not stored in the repository. `tools/make-guide.py` (Python + reportlab) builds the directions PDF the same way.
 
 ## Publish with GitHub Pages
 

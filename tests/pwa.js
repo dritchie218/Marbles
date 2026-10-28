@@ -24,6 +24,11 @@ for (const i of m.icons) {
 const html = read('index.html');
 for (const ref of ['manifest.json', 'icons/apple-touch-icon.png', "register('sw.js')"]) check(html.includes(ref), `index.html references ${ref}`);
 check(fs.existsSync(path.join(root, 'icons/apple-touch-icon.png')), 'apple-touch-icon exists');
+check(html.includes('href="Marbles-Home-Screen-Directions.pdf"'), 'index.html links the home-screen directions PDF');
+const wf = read('.github/workflows/pages.yml');
+check(fs.existsSync(path.join(root, 'tools/make-guide.py')) && wf.includes('python tools/make-guide.py') &&
+  wf.indexOf('npm run icons') < wf.indexOf('make-guide.py') && wf.indexOf('make-guide.py') < wf.indexOf('upload-pages-artifact'),
+  'deploy builds the directions PDF after the icons and before upload');
 
 const sw = read('sw.js');
 let parsed = true; try { new Function(sw); } catch (e) { parsed = false; }

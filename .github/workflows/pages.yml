@@ -28,6 +28,15 @@ jobs:
         run: npm test
       - name: Generate app icons
         run: npm run icons
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate home-screen directions PDF
+        run: |
+          pip install reportlab
+          python tools/make-guide.py
+          test -s Marbles-Home-Screen-Directions.pdf
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload site
