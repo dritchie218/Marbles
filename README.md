@@ -26,7 +26,7 @@ Plays full simulated games on 4 and 6 player boards, with every skin, and checks
 
 ## Publish with GitHub Pages
 
-Settings → Pages → Build and deployment → Deploy from a branch → `main` / `(root)`.
+Settings → Pages → Build and deployment → Source → **GitHub Actions**. The `.github/workflows/pages.yml` workflow runs the tests and deploys on every push to `main` (or run it manually from the Actions tab).
 
 ## License
 
