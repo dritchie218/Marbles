@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Marbles (Pegs and Jokers) board game that runs in any browser, built from a single HTML file.",
   "scripts": {
-    "test": "node tests/simulate.js && node tests/teams.js && node tests/pwa.js",
+    "test": "node tests/simulate.js && node tests/teams.js && node tests/players.js && node tests/pwa.js",
     "icons": "node tools/make-icons.js"
   },
   "license": "MIT",

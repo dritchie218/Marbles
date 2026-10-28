@@ -7,6 +7,7 @@ A browser version of the card-and-marble board game "Marbles" (Pegs and Jokers),
 ## Features
 
 - 4 or 6 players against computer opponents, with Teams or individual play: 4 players = 2 teams of 2 (partner across), 6 players = 2 teams of 3 (every other seat). Finished players play for the teammate to their left (clockwise); a 7 can be shared with any teammate
+- Pass-and-play: before each game, choose **Person** or **Computer** for every seat. People share one phone; a “Pass to …” screen hides the cards between turns
 - Rules follow the printed "The Joker Game Marbles" sheet (see the Rules section inside the game)
 - Choose your marble color and a board skin: MN football (default), Midnight, Oak, or Minnesota hockey and baseball colors
 - Playing-card images, cat-eye marbles, a log of every move, and a preview of where each move can land (red sends an opponent to start, green sends a teammate to their home gate)
@@ -33,7 +34,7 @@ Open `index.html` in any browser. Nothing to install.
 npm test
 ```
 
-Plays full simulated games on 4 and 6 player boards, with every skin, and checks the hole spacing and counts. Checks the team rules (teams of 2 and 3, playing for teammates, shared 7s, team wins). Also checks the app manifest, icons and offline service worker. Needs Node 18 or newer.
+Plays full simulated games on 4 and 6 player boards, with every skin, and checks the hole spacing and counts. Checks the team rules (teams of 2 and 3, playing for teammates, shared 7s, team wins) and pass-and-play (seat choices, pass screens, mixed person/computer games). Also checks the app manifest, icons and offline service worker. Needs Node 18 or newer.
 
 ## App icons
 
