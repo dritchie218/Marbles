@@ -19,6 +19,7 @@ select{font:inherit;font-size:13px}
 svg{width:100%;height:auto;display:block}
 #st{font-weight:600;min-height:22px;margin:6px 0 0}#lg{font-size:13px;opacity:.75;min-height:18px;margin:2px 0 8px}
 #hand{display:flex;gap:4px}
+#tl{font-size:12px;opacity:.85;margin:4px 0 0;line-height:1.6}#tl:empty{display:none}#tl i{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 3px 0 5px;vertical-align:-1px}
 .card{flex:1;min-width:0;min-height:66px;border:2px solid var(--bd);border-radius:9px;background:var(--card);color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit;padding:4px 0}
 .card{padding:3px 2px;min-height:0}.card svg{width:100%;height:auto;display:block}.card small{font-size:9px;opacity:.75;margin-top:2px}
 #log{max-height:170px;overflow:auto;font-size:13px;line-height:1.5}#log i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
@@ -34,6 +35,7 @@ details{font-size:13px;margin-top:12px;line-height:1.5}
 <label>You: <select id="cl" onchange="init()"><option>Green</option><option>Red</option><option>Gold</option><option>Sky</option><option>Indigo</option><option>Pink</option></select></label>
 <select id="th" onchange="render()"><option value="mid">Midnight</option><option value="oak">Oak</option><option value="vik" selected>MN football (purple &amp; gold)</option><option value="wild">MN hockey (green &amp; red)</option><option value="twn">MN baseball (navy &amp; red)</option></select></div>
 <svg id="b" viewBox="0 0 400 400"></svg>
+<div id="tl"></div>
 <div id="st"></div><div id="lg"></div><div id="hand"></div>
 <details open><summary>Move log</summary><div id="log"></div></details>
 <details><summary>Rules</summary><div class="rules">
@@ -147,6 +149,7 @@ if(!selPeg){[...new Set(cur.map(a=>a.o*9+a.k))].forEach(id=>{const o=id/9|0,k=id
 cur.forEach(a=>{const[x,y]=pos(a.o,a.to,a.k);s+=`<circle cx="${x}" cy="${y}" r="${r1(MR*.9)}" fill="none" stroke="${cq(a)}" stroke-width="1.6" stroke-dasharray="2 2" pointer-events="none"/>`})}
 else cur.forEach((a,i)=>{if(a.o==selPeg[0]&&a.k==selPeg[1]){const[x,y]=pos(a.o,a.to,a.k);s+=ring(x,y,MR*1.5,'rgba(255,255,255,.4)',`go(${i})`,cq(a))}});
 $('b').innerHTML=s;
+$('tl').innerHTML=teams?['Your team','Opponents'].map((t,i)=>t+':'+side(i).map(q=>`<i style="background:${COL[q]}"></i>${NAME[q]}`).join('')).join(' &nbsp;·&nbsp; ')+(!over&&ctl(0)?` &nbsp;·&nbsp; <b>Playing for ${NAME[ctl(0)]}</b>`:''):'';
 $('hand').innerHTML=hands[0].map((c,i)=>`<button class="card${i==sel?' on':''}" onclick="pick(${i})">${cardSvg(c)}<small>${H[rk(c)]||'move '+rk(c)}</small></button>`).join('');
 $('log').innerHTML=log.slice(0,40).map(e=>`<div><i style="background:${COL[e.p]}"></i>${e.t}</div>`).join('');
 $('st').textContent=over?msg:turn?NAME[turn]+' is playing…':pend?`Now move another marble ${pend.rem.t=='f'?'forward':'back'} ${pend.rem.n}.`:noMoves()?'No legal move. Tap a card to discard it.':sel==null?(stuck[0]>=3?'Any card brings a marble out. ':'')+'Your turn: pick a card.':selPeg?'Tap where to go.':'Tap a pulsing marble.';

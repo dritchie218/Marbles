@@ -10,7 +10,7 @@ const mk = () => ({ value: '4', checked: true, innerHTML: '', textContent: '', s
 global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 const api = new Function(js + `
-return {init,mate,side,ctl,moves,step,fin,ai,act,second,forced,abs,tk,tp,A,
+return {init,render,mate,side,ctl,moves,step,fin,ai,act,second,forced,abs,tk,tp,A,
   setPegs(o,v){pegs[o]=v.slice()}, setHand(p,h){hands[p]=h.slice()}, setTurn(p){turn=p},
   get s(){return {NP,T,E,Y,over,turn,pend,pegs,hands,msg}}}`)();
 
@@ -33,6 +33,19 @@ check(String(api.side(0)) === '0,2,4' && String(api.side(1)) === '1,3,5', '6 pla
 check(!api.mate(0, 1) && !api.mate(0, 3) && !api.mate(0, 5), '6 players: neighbours are opponents');
 start(6, false);
 check([1, 2, 3, 4, 5].every(q => !api.mate(0, q)) && String(api.side(0)) === '0', 'Teams off: nobody is a teammate');
+
+// --- team line under the board ---
+const tl = () => els.tl.innerHTML.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+start(6);
+check(tl() === 'Your team:YouGoldIndigo · Opponents:RedSkyPink', '6 players: team line lists both teams (' + tl() + ')');
+check((els.tl.innerHTML.match(/<i /g) || []).length === 6, '6 players: team line shows a colour dot per player');
+start(4);
+check(tl() === 'Your team:YouGold · Opponents:RedSky', '4 players: team line lists both pairs (' + tl() + ')');
+start(6, false);
+check(els.tl.innerHTML === '', 'Teams off: no team line');
+start(6);
+api.setPegs(0, [1, 2, 3, 4, 5].map(i => api.s.E + i)); api.render();
+check(/Playing for Gold$/.test(tl()), 'team line shows who you are playing for once you are home (' + tl() + ')');
 
 // --- the board runs clockwise, so "left" = next seat in turn order ---
 start(6);
