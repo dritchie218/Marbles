@@ -51,13 +51,14 @@ details{font-size:13px;margin-top:12px;line-height:1.5}
 <p class="i">Replaces partners or opponents marble with one’s own marble. Partner goes to home gate; opponent goes to start position</p>
 <p><b>NOTES #1</b><br>You can jump your partner and your opponent, but you cannot jump yourself; and you cannot back into or out of your home positions. Land on your opponent and he/she goes to <b>start</b>; land on partner and he/she goes to <b>home gate</b></p>
 <p><b>NOTES #2</b><br>When your five marbles are home, you then play for your partner to the left; <b>when you and your partner have all your marbles in home, you win!</b> <b>Individual play-all five marbles in and you win!</b></p>
+<p><b>6 PLAYERS – TEAMS OF THREE</b><br>Teammates sit every other seat. When your five marbles are home, play for the teammate to your left (clockwise). If that teammate is home too, you both play for the last teammate. A 7 can be shared with any teammate. <b>When all three of you are home, your team wins!</b></p>
 </div></details>
 </div>
 <script>
 const N=18,CI=7,G=5,Y=-99,C6=['#3fae6a','#ee7fa8','#1b1b1b','#8b2a73','#4b2fa0','#7fb0e8'],N6=['You','Pink','Black','Magenta','Indigo','Sky'],C4=['#d93a3a','#1b1b1b','#2f9a55','#2a4fc4'],N4=['You','Black','Green','Blue'];let COL,NAME;
 const H={A:'out · 1',K:'out · 13',Q:'out · 12',J:'out · 11','7':'split 7','8':'back 8','9':'fwd + back',JK:'swap'};
 let log=[],dsc='',curR='',NP,T,E,MR,SD,V,deck,disc,hands,pegs,turn,sel,selPeg,pend,over,msg,cap,stuck,teams,cur=[];
-const $=id=>document.getElementById(id),A=p=>p*N+CI,abs=(p,u)=>((A(p)+u)%T+T)%T,part=o=>teams?(o+NP/2)%NP:-1,done=o=>pegs[o].every(v=>v>E),ctl=p=>teams&&done(p)?part(p):p,hid=(o,u)=>u>E?'s'+u:abs(o,u),tk=u=>u>-50&&u<=E,r1=x=>+x.toFixed(1);
+const $=id=>document.getElementById(id),A=p=>p*N+CI,abs=(p,u)=>((A(p)+u)%T+T)%T,mate=(o,q)=>teams&&o!=q&&o%2==q%2,side=o=>[...Array(NP).keys()].filter(q=>q==o||mate(o,q)),done=o=>pegs[o].every(v=>v>E),ctl=p=>{if(teams)for(let i=0;i<NP;i+=2){const q=(p+i)%NP;if(!done(q))return q}return p},hid=(o,u)=>u>E?'s'+u:abs(o,u),tk=u=>u>-50&&u<=E,r1=x=>+x.toFixed(1);
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 let K;
 function geo(){const Rrad=NP==6?186:176;V=[];
@@ -85,24 +86,24 @@ function fwd(o,k,n){const P=pegs[o],v=P[k];if(v<-50||v+n>T)return null;for(let i
 function bwd(o,k,n){const P=pegs[o],v=P[k];if(v<-50||v>E)return null;let q=v;for(let i=0;i<n;i++){q--;if(q<1-G)q+=T;if(P.some((u,j)=>j!=k&&u>-50&&hid(o,u)==hid(o,q)))return null}return q}
 const second=({rem:r,ex})=>{const l=[];r.ow.forEach(o=>pegs[o].forEach((v,k)=>{if(o==ex[0]&&k==ex[1])return;const t=r.t=='f'?fwd(o,k,r.n):bwd(o,k,r.n);if(t!=null)l.push({o,k,to:t})}));return l};
 const rk=c=>c.split('|')[0],cname=c=>{const[r,s]=c.split('|');return r=='JK'?'Joker':r+s},addLog=(p,t)=>{log.unshift({p,t});if(log.length>80)log.pop()};
-function moves(p,c){c=rk(c);const ow=ctl(p),pt=part(ow),P=pegs[ow],m=[],add=(o,k,t,x)=>{if(t!=null)m.push({o,k,to:t,...x})};
+function moves(p,c){c=rk(c);const ow=ctl(p),P=pegs[ow],m=[],add=(o,k,t,x)=>{if(t!=null)m.push({o,k,to:t,...x})};
 if(stuck[p]>=3||['A','K','Q','J'].includes(c)){const k=P.indexOf(Y);if(k>=0&&!P.some(u=>tk(u)&&hid(ow,u)==hid(ow,0)))add(ow,k,0,{out:1})}
 const tr=[0,1,2,3,4].filter(k=>tk(P[k]));
 if(c=='JK')tr.forEach(k=>pegs.forEach((Q,q)=>{if(q!=ow)Q.forEach(u=>{if(tk(u)){const t0=(abs(q,u)-A(ow)+T)%T,t=t0>E?t0-T:t0;if(!P.some(w=>tk(w)&&hid(ow,w)==hid(ow,t)))add(ow,k,t)}})}));
 else if(c=='8')tr.forEach(k=>add(ow,k,bwd(ow,k,8)));
 else if(c=='7'||c=='9'){const sp=(o,k,t,r)=>{if(t==null)return;const v=pegs[o][k];pegs[o][k]=t;const ok=second({rem:r,ex:[o,k]}).length;pegs[o][k]=v;if(ok)m.push({o,k,to:t,rem:r})};
-if(c=='7'){const w=[ow,pt].filter(o=>o>=0);w.forEach(o=>[0,1,2,3,4].forEach(k=>{add(o,k,fwd(o,k,7));for(let a=1;a<7;a++)sp(o,k,fwd(o,k,a),{t:'f',n:7-a,ow:w})}))}
+if(c=='7'){const w=side(ow);w.forEach(o=>[0,1,2,3,4].forEach(k=>{add(o,k,fwd(o,k,7));for(let a=1;a<7;a++)sp(o,k,fwd(o,k,a),{t:'f',n:7-a,ow:w})}))}
 else[0,1,2,3,4].forEach(k=>{for(let a=1;a<9;a++){sp(ow,k,fwd(ow,k,a),{t:'b',n:9-a,ow:[ow]});sp(ow,k,bwd(ow,k,a),{t:'f',n:9-a,ow:[ow]})}})}
 else{const n={A:1,K:13,Q:12,J:11}[c]||+c;P.forEach((v,k)=>add(ow,k,fwd(ow,k,n)))}return m}
 function step(o,k,to){const v=pegs[o][k],m=o==ctl(turn)?'a marble':(o?NAME[o]+'’s marble':'your marble');let d=to-v;if(d>T/2)d-=T;
-dsc+=v<-50?'Brought a marble out. ':curR=='JK'?'Jumped '+m+' onto another marble. ':m[0].toUpperCase()+m.slice(1)+(d<0?' backed '+-d:' moved '+d)+(to>E&&v<=E?' into the safe area':'')+'. ';pegs[o][k]=to;if(to>E)return;const a=abs(o,to);pegs.forEach((Q,q)=>{if(q!=o)Q.forEach((u,j)=>{if(tk(u)&&abs(q,u)==a){const w=q?NAME[q]+'’s':'Your';if(q==part(o)){let g=E;while(g>1-G&&(Q.includes(g)||pegs.some((R,r)=>r!=q&&R.some(w=>tk(w)&&abs(r,w)==abs(q,g)))))g--;Q[j]=g;cap+=w+' marble went to the home gate. '}else{Q[j]=Y;cap+=w+' marble went back to start. '}}})})}
+dsc+=v<-50?'Brought a marble out. ':curR=='JK'?'Jumped '+m+' onto another marble. ':m[0].toUpperCase()+m.slice(1)+(d<0?' backed '+-d:' moved '+d)+(to>E&&v<=E?' into the safe area':'')+'. ';pegs[o][k]=to;if(to>E)return;const a=abs(o,to);pegs.forEach((Q,q)=>{if(q!=o)Q.forEach((u,j)=>{if(tk(u)&&abs(q,u)==a){const w=q?NAME[q]+'’s':'Your';if(mate(q,o)){let g=E;while(g>1-G&&(Q.includes(g)||pegs.some((R,r)=>r!=q&&R.some(w=>tk(w)&&abs(r,w)==abs(q,g)))))g--;Q[j]=g;cap+=w+' marble went to the home gate. '}else{Q[j]=Y;cap+=w+' marble went back to start. '}}})})}
 const val=a=>{const v=pegs[a.o][a.k];let s=(a.out?30:0)+(a.to>E?40:0)+(v<-50?0:a.to-v)*(a.o==ctl(turn)?1:.5)+Math.random()*3;
-if(a.to<=E){const x=abs(a.o,a.to);pegs.forEach((Q,q)=>{if(q!=a.o)Q.forEach(u=>{if(tk(u)&&abs(q,u)==x)s+=q==part(a.o)?15:50})})}return s};
+if(a.to<=E){const x=abs(a.o,a.to);pegs.forEach((Q,q)=>{if(q!=a.o)Q.forEach(u=>{if(tk(u)&&abs(q,u)==x)s+=mate(q,a.o)?15:50})})}return s};
 function act(p,ci,a){curR=rk(hands[p][ci]);if(a.out)stuck[p]=0;step(a.o,a.k,a.to);if(!a.rem)return fin(p,ci);const pd={rem:a.rem,ex:[a.o,a.k],ci};if(!second(pd).length)return fin(p,ci);
 if(p){const b=second(pd).sort((x,y)=>val(y)-val(x))[0];step(b.o,b.k,b.to);fin(p,ci)}else{pend=pd;selPeg=null;render()}}
 function fin(p,ci){const c=hands[p].splice(ci,1)[0];disc.push(c);msg=NAME[p]+' played '+cname(c)+'. '+dsc+cap;addLog(p,msg);dsc='';cap='';pend=null;sel=selPeg=null;
-let w=-1;for(let o=0;o<NP;o++)if(teams?o<NP/2&&done(o)&&done(part(o)):done(o)){w=o;break}
-if(w>=0){over=true;msg=teams?(w?NAME[w]+' and '+NAME[part(w)]+' win.':'Your team wins! 🎉'):(w?NAME[w]+' wins.':'You win! 🎉');return render()}
+let w=-1;for(let o=0;o<NP;o++)if(teams?o<2&&side(o).every(done):done(o)){w=o;break}
+if(w>=0){over=true;msg=teams?(w?side(w).map(q=>NAME[q]).join(', ').replace(/, ([^,]*)$/,' and $1')+' win.':'Your team wins! 🎉'):(w?NAME[w]+' wins.':'You win! 🎉');return render()}
 turn=(p+1)%NP;begin()}
 function forced(p,ci){const P=pegs[ctl(p)];if(!P.some(tk)&&P.includes(Y))stuck[p]++;disc.push(hands[p].splice(ci,1)[0]);msg=NAME[p]+' had no move and discarded.';addLog(p,msg);sel=selPeg=null;turn=(p+1)%NP;begin()}
 function ai(){if(over)return;const p=turn;let b=null;hands[p].forEach((c,ci)=>moves(p,c).forEach(a=>{const s=val(a);if(!b||s>b.s)b={s,ci,a}}));
@@ -140,7 +141,7 @@ function render(){cur=over||turn?[]:pend?second(pend):sel!=null?moves(0,hands[0]
 $('b').setAttribute('viewBox',NP==6?'-10 20 420 360':'30 30 340 340');
 let s=board();
 pegs.forEach((Q,p)=>Q.forEach((u,k)=>{const[x,y]=pos(p,u,k);s+=marble(x,y,p,k)}));
-const cq=a=>{if(a.to>E)return'#fff';const x=abs(a.o,a.to);let r='#fff';pegs.forEach((Q,q)=>{if(q!=a.o)Q.forEach(u=>{if(tk(u)&&abs(q,u)==x)r=q==part(a.o)?'#4ade80':'#ff5a5a'})});return r};
+const cq=a=>{if(a.to>E)return'#fff';const x=abs(a.o,a.to);let r='#fff';pegs.forEach((Q,q)=>{if(q!=a.o)Q.forEach(u=>{if(tk(u)&&abs(q,u)==x)r=mate(q,a.o)?'#4ade80':'#ff5a5a'})});return r};
 const ring=(x,y,r,f,fn,c)=>`<circle class="pulse" cx="${x}" cy="${y}" r="${r1(r)}" fill="${f}" stroke="${c||(THS[$('th').value]||THS.mid).hint}" stroke-width="1.5" onclick="${fn}" style="cursor:pointer"/>`;
 if(!selPeg){[...new Set(cur.map(a=>a.o*9+a.k))].forEach(id=>{const o=id/9|0,k=id%9,[x,y]=pos(o,pegs[o][k],k);s+=ring(x,y,MR*1.8,'transparent',`tap(${o},${k})`)});
 cur.forEach(a=>{const[x,y]=pos(a.o,a.to,a.k);s+=`<circle cx="${x}" cy="${y}" r="${r1(MR*.9)}" fill="none" stroke="${cq(a)}" stroke-width="1.6" stroke-dasharray="2 2" pointer-events="none"/>`})}
@@ -149,7 +150,7 @@ $('b').innerHTML=s;
 $('hand').innerHTML=hands[0].map((c,i)=>`<button class="card${i==sel?' on':''}" onclick="pick(${i})">${cardSvg(c)}<small>${H[rk(c)]||'move '+rk(c)}</small></button>`).join('');
 $('log').innerHTML=log.slice(0,40).map(e=>`<div><i style="background:${COL[e.p]}"></i>${e.t}</div>`).join('');
 $('st').textContent=over?msg:turn?NAME[turn]+' is playing…':pend?`Now move another marble ${pend.rem.t=='f'?'forward':'back'} ${pend.rem.n}.`:noMoves()?'No legal move. Tap a card to discard it.':sel==null?(stuck[0]>=3?'Any card brings a marble out. ':'')+'Your turn: pick a card.':selPeg?'Tap where to go.':'Tap a pulsing marble.';
-$('lg').textContent=over?'':sel!=null&&!turn&&!pend&&!selPeg?'Dashed rings show every landing spot. Red sends an opponent back to start; green sends your partner to their home gate.':msg}
+$('lg').textContent=over?'':sel!=null&&!turn&&!pend&&!selPeg?'Dashed rings show every landing spot. Red sends an opponent back to start; green sends a teammate to their home gate.':msg}
 if(typeof navigator!='undefined'&&'serviceWorker'in navigator&&location.protocol=='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 init();
 </script></body></html>
