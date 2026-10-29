@@ -93,11 +93,15 @@ api.setPegs(2, [15, s.Y, s.Y, s.Y, s.Y]);
 api.setPegs(1, [20, s.Y, s.Y, s.Y, s.Y]);
 const jokerMoves = api.moves(0, 'JK|♠');
 owners = new Set(jokerMoves.map(m => m.o));
-check(owners.has(2), 'Joker: can move a teammate\'s marble');
-check(![1, 3, 5].some(o => owners.has(o)), 'Joker: only your team\'s marbles can be moved');
-const targetRel = ((api.abs(1, 20) - api.A(2) + s.T) % s.T);
-const target = targetRel > s.E ? targetRel - s.T : targetRel;
-check(jokerMoves.some(m => m.o === 2 && m.k === 0 && m.to === target), 'Joker: teammate marble can jump onto an opponent marble');
+check(owners.size === 1 && owners.has(0), 'Joker: moves your own marble while you still have marbles in play');
+const teammateTargetRel = ((api.abs(2, 15) - api.A(0) + s.T) % s.T);
+const teammateTarget = teammateTargetRel > s.E ? teammateTargetRel - s.T : teammateTargetRel;
+check(jokerMoves.some(m => m.o === 0 && m.k === 0 && m.to === teammateTarget), 'Joker: can target a teammate\'s marble with your own marble');
+check(![1, 3, 5].some(o => owners.has(o)), 'Joker: only the active player\'s marbles are moved');
+api.setPegs(0, [s.E + 1, s.E + 2, s.E + 3, s.E + 4, s.E + 5]);
+const playingForTeammate = api.moves(0, 'JK|♠');
+owners = new Set(playingForTeammate.map(m => m.o));
+check(api.ctl(0) === 2 && owners.size === 1 && owners.has(2), 'Joker: moves teammate\'s marble after you finish and play for them');
 
 api.setPegs(0, [3, 20, s.Y, s.Y, s.Y]); // a 9 needs two of your own marbles out
 owners = new Set(api.moves(0, '9|♠').map(m => m.o));
