@@ -67,14 +67,38 @@ check(api.ctl(0) === 2, 'falls back to the left teammate again if they are not f
 s = start(4); api.setPegs(0, [1, 2, 3, 4, 5].map(i => s.E + i));
 check(api.ctl(0) === 2, '4 players: finished player plays for partner (unchanged)');
 
-// --- a 7 can be split with any teammate, never an opponent ---
+// --- 7 must start with your own marble, then may share with teammates ---
 s = start(6);
 for (let p = 0; p < 6; p++) api.setPegs(p, [3 + p, s.Y, s.Y, s.Y, s.Y]);
-let owners = new Set(api.moves(0, '7|♠').map(m => m.o));
-check([0, 2, 4].every(o => owners.has(o)) && ![1, 3, 5].some(o => owners.has(o)), '7: moves offered for all three teammates, no opponents');
-const split = api.moves(0, '7|♠').find(m => m.rem);
-owners = new Set(api.second({ rem: split.rem, ex: [split.o, split.k] }).map(m => m.o));
-check(owners.size > 0 && ![1, 3, 5].some(o => owners.has(o)), '7 split: second part can go to teammates only');
+let sevenMoves = api.moves(0, '7|♠');
+let owners = new Set(sevenMoves.map(m => m.o));
+check(owners.size === 1 && owners.has(0) && sevenMoves.every(m => m.o === 0), '7: first move must use your own marble');
+const split = sevenMoves.find(m => m.rem);
+check(!!split, '7: legal split moves are offered when available');
+if (split) {
+  owners = new Set(api.second({ rem: split.rem, ex: [split.o, split.k] }).map(m => m.o));
+  check(owners.has(2) || owners.has(4), '7 split: remaining movement can use a teammate');
+  check(![1, 3, 5].some(o => owners.has(o)), '7 split: remaining movement cannot use an opponent');
+}
+for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(2, [8, s.Y, s.Y, s.Y, s.Y]);
+check(api.moves(0, '7|♠').length === 0, '7: unavailable when you have no marble in play, even if a teammate does');
+
+// --- Joker needs your own marble in play, but can move a teammate's marble ---
+for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(2, [8, s.Y, s.Y, s.Y, s.Y]);
+check(api.moves(0, 'JK|♠').length === 0, 'Joker: unavailable when your own marbles are all at start');
+api.setPegs(0, [10, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(2, [15, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(1, [20, s.Y, s.Y, s.Y, s.Y]);
+const jokerMoves = api.moves(0, 'JK|♠');
+owners = new Set(jokerMoves.map(m => m.o));
+check(owners.has(2), 'Joker: can move a teammate\'s marble');
+check(![1, 3, 5].some(o => owners.has(o)), 'Joker: only your team\'s marbles can be moved');
+const targetRel = ((api.abs(1, 20) - api.A(2) + s.T) % s.T);
+const target = targetRel > s.E ? targetRel - s.T : targetRel;
+check(jokerMoves.some(m => m.o === 2 && m.k === 0 && m.to === target), 'Joker: teammate marble can jump onto an opponent marble');
+
 api.setPegs(0, [3, 20, s.Y, s.Y, s.Y]); // a 9 needs two of your own marbles out
 owners = new Set(api.moves(0, '9|♠').map(m => m.o));
 check(owners.size === 1 && owners.has(0), '9: own marbles only (not shared)');
