@@ -14,7 +14,7 @@ global.setTimeout = () => 0;
 const api = new Function(js + `
 return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,
   get speed(){return moveSpeed},
-  get s(){return {NP,T,E,CI,over,turn,pend,hands,SD,N,stuck,forcedCard}}}`)();
+  get s(){return {NP,T,E,CI,over,turn,pend,hands,pegs,SD,N,stuck,forcedCard}}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
@@ -42,6 +42,13 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   }
   check(Math.max(...d) - Math.min(...d) < 0.3, `${np} players: track holes evenly spaced`);
   check(s.T === 18 * Number(np), `${np} players: ${s.T} track holes`);
+  // A card that carries the only active marble across its own home gate is legal.
+  s.pegs.forEach(P => P.fill(-99));
+  s.pegs[0][0] = s.E - 2;
+  const gateCrossing = api.moves(0, '3|♠');
+  check(gateCrossing.length === 1 && gateCrossing[0].to === s.E + 1,
+    `${np} players: only legal move can cross own home gate into the safe lane`);
+  s.pegs[0][0] = -99;
   const sideX = [];
   for (let t = 0; t <= 18; t++) sideX.push(api.W(0, t, 0)[0]);
   const co = api.tp(api.A(0))[0];
