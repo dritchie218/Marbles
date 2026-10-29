@@ -97,7 +97,30 @@ check(owners.size === 1 && owners.has(0), 'Joker: moves your own marble while yo
 const teammateTargetRel = ((api.abs(2, 15) - api.A(0) + s.T) % s.T);
 const teammateTarget = teammateTargetRel > s.E ? teammateTargetRel - s.T : teammateTargetRel;
 check(jokerMoves.some(m => m.o === 0 && m.k === 0 && m.to === teammateTarget), 'Joker: can target a teammate\'s marble with your own marble');
+
 check(![1, 3, 5].some(o => owners.has(o)), 'Joker: only the active player\'s marbles are moved');
+// If a Joker displaces a partner to their home gate, an opponent occupying
+// that same gate is knocked off the board rather than blocking the partner.
+s = start(6);
+for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
+const atGate = (owner, q, spot) => {
+  const a = api.abs(owner, spot), t = ((a - api.A(q)) % s.T + s.T) % s.T;
+  return t > s.E ? t - s.T : t;
+};
+api.setPegs(0, [10, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(2, [15, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(1, [atGate(2, 1, s.E), s.Y, s.Y, s.Y, s.Y]);
+api.setHand(0, ['JK|♠']);
+api.setTurn(0);
+const targetRel = ((api.abs(2, 15) - api.A(0) + s.T) % s.T);
+const target = targetRel > s.E ? targetRel - s.T : targetRel;
+const collisionMove = api.moves(0, 'JK|♠').find(m => m.o === 0 && m.k === 0 && m.to === target);
+check(!!collisionMove, 'Joker: partner target move is available for home-gate collision test');
+if (collisionMove) {
+  api.act(0, 0, collisionMove);
+  check(api.s.pegs[2][0] === s.E, 'Joker: displaced partner goes to their home gate');
+  check(api.s.pegs[1][0] === s.Y, 'Joker: opponent occupying partner home gate is sent off the board');
+}
 api.setPegs(0, [s.E + 1, s.E + 2, s.E + 3, s.E + 4, s.E + 5]);
 const playingForTeammate = api.moves(0, 'JK|♠');
 owners = new Set(playingForTeammate.map(m => m.o));
