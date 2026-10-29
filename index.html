@@ -136,7 +136,7 @@ const rk=c=>c.split('|')[0],cname=c=>{const[r,s]=c.split('|');return r=='JK'?'Jo
 function moves(p,c){c=rk(c);const ow=ctl(p),P=pegs[ow],m=[],add=(o,k,t,x)=>{if(t!=null)m.push({o,k,to:t,...x})};
 if(stuck[p]>=3||['A','K','Q','J'].includes(c)){const k=P.indexOf(Y);if(k>=0&&!P.some(u=>tk(u)&&hid(ow,u)==hid(ow,0)))add(ow,k,0,{out:1})}
 const tr=[0,1,2,3,4].filter(k=>tk(P[k]));
-if(c=='JK'){if(P.some(tk))side(ow).forEach(o=>pegs[o].forEach((v,k)=>{if(tk(v))pegs.forEach((Q,q)=>{if(q!=o)Q.forEach(u=>{if(tk(u)){const t0=(abs(q,u)-A(o)+T)%T,t=t0>E?t0-T:t0;if(!pegs[o].some(w=>tk(w)&&hid(o,w)==hid(o,t)))add(o,k,t)}})})}))}
+if(c=='JK'){if(P.some(tk))[ow].forEach(o=>pegs[o].forEach((v,k)=>{if(tk(v))pegs.forEach((Q,q)=>{if(q!=o)Q.forEach(u=>{if(tk(u)){const t0=(abs(q,u)-A(o)+T)%T,t=t0>E?t0-T:t0;if(!pegs[o].some(w=>tk(w)&&hid(o,w)==hid(o,t)))add(o,k,t)}})})}))}
 else if(c=='8')tr.forEach(k=>add(ow,k,bwd(ow,k,8)));
 else if(c=='7'||c=='9'){const sp=(o,k,t,r)=>{if(t==null)return;const v=pegs[o][k];pegs[o][k]=t;const ok=second({rem:r,ex:[o,k]}).length;pegs[o][k]=v;if(ok)m.push({o,k,to:t,rem:r})};
 if(c=='7'){const w=side(ow);const ownOut=P.some(v=>tk(v));if(ownOut){[0,1,2,3,4].forEach(k=>{if(tk(P[k])){add(ow,k,fwd(ow,k,7));for(let a=1;a<7;a++)sp(ow,k,fwd(ow,k,a),{t:'f',n:7-a,ow:w})}})}}
