@@ -103,6 +103,7 @@ check(fourthCardMoves.length === 1 && fourthCardMoves[0].out && fourthCardMoves[
   'fourth card: a Joker is forced to bring a marble out, not played as a swap');
 
 // --- Joker needs your own marble in play, but can move a teammate's marble ---
+s = start(6);
 for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
 api.setPegs(2, [8, s.Y, s.Y, s.Y, s.Y]);
 check(api.moves(0, 'JK|♠').length === 0, 'Joker: unavailable when your own marbles are all at start');
