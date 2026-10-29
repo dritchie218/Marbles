@@ -211,9 +211,13 @@ return s}
 function render(){cur=over||setup||cover||!hu(turn)?[]:pend?second(pend):sel!=null?moves(turn,hands[turn][sel]):[];
 $('b').setAttribute('viewBox',NP==6?'-10 20 420 360':'30 30 340 340');
 let s=board();
+const movingTrack=!!(lastMove&&lastMove.from>=0&&lastMove.from<=E&&lastMove.to>=0&&lastMove.to<=E&&Math.abs(lastMove.to-lastMove.from)>1);
+let movePath='';
+if(movingTrack){const pts=[[...pos(lastMove.o,lastMove.from,lastMove.k)],...trailFX.filter(f=>f.o===lastMove.o&&f.k===lastMove.k).map(f=>pos(f.o,f.u,f.k)),[...pos(lastMove.o,lastMove.to,lastMove.k)]];movePath=pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ')}
 trailFX.forEach(f=>{const[x,y]=pos(f.o,f.u,f.k);s+='<circle class="fx-trail" cx="'+x+'" cy="'+y+'" r="'+r1(MR*.72)+'" fill="#ffe36e" fill-opacity=".9" style="animation-delay:'+f.delay+'s"/>'});
-pegs.forEach((Q,p)=>Q.forEach((u,k)=>{const[x,y]=pos(p,u,k);s+=marble(x,y,p,k,hitFX.find(f=>f.o==p&&f.k==k)?.kind||(lastMove&&lastMove.o==p&&lastMove.k==k?"active-move":null))}));
-if(lastMove){const [x,y]=pos(lastMove.o,pegs[lastMove.o][lastMove.k],lastMove.k);s+='<circle class="fx-move-ring" cx="'+x+'" cy="'+y+'" r="'+r1(MR*1.25)+'" fill="none" stroke="#ffe36e" stroke-width="2.5" pointer-events="none"/>'}
+pegs.forEach((Q,p)=>Q.forEach((u,k)=>{if(movingTrack&&lastMove.o===p&&lastMove.k===k)return;const[x,y]=pos(p,u,k);s+=marble(x,y,p,k,hitFX.find(f=>f.o==p&&f.k==k)?.kind||(lastMove&&lastMove.o==p&&lastMove.k==k?"active-move":null))}));
+if(movingTrack){const dur=Math.max(450,(trailFX.length+1)*(moveSpeed==='slow'?450:moveSpeed==='fast'?90:220));const[x,y]=pos(lastMove.o,lastMove.to,lastMove.k);s+=`<g><circle r="${r1(MR*1.25)}" fill="none" stroke="#ffe36e" stroke-width="2.5"/><g>${marble(0,0,lastMove.o,lastMove.k,'active-move')}</g><animateMotion path="${movePath}" dur="${dur}ms" fill="freeze" calcMode="linear"/></g>`}
+if(lastMove&&!movingTrack){const [x,y]=pos(lastMove.o,pegs[lastMove.o][lastMove.k],lastMove.k);s+='<circle class="fx-move-ring" cx="'+x+'" cy="'+y+'" r="'+r1(MR*1.25)+'" fill="none" stroke="#ffe36e" stroke-width="2.5" pointer-events="none"/>'}
 const cq=a=>{if(a.to>E)return'#fff';const x=abs(a.o,a.to);let r='#fff';pegs.forEach((Q,q)=>{if(q!=a.o)Q.forEach(u=>{if(tk(u)&&abs(q,u)==x)r=mate(q,a.o)?'#4ade80':'#ff5a5a'})});return r};
 const ring=(x,y,r,f,fn,c)=>`<circle class="pulse" cx="${x}" cy="${y}" r="${r1(r)}" fill="${f}" stroke="${c||(THS[$('th').value]||THS.mid).hint}" stroke-width="1.5" onclick="${fn}" style="cursor:pointer"/>`;
 if(!selPeg){[...new Set(cur.map(a=>a.o*9+a.k))].forEach(id=>{const o=id/9|0,k=id%9,[x,y]=pos(o,pegs[o][k],k);s+=ring(x,y,MR*1.8,'transparent',`tap(${o},${k})`)});
