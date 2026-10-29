@@ -35,7 +35,11 @@ details{font-size:13px;margin-top:12px;line-height:1.5}
 .fx-impact{transform-box:fill-box;transform-origin:center;animation:hitImpact 1.4s ease-out}
 .fx-opponent{transform-box:fill-box;transform-origin:center;animation:hitOpponent 1.8s ease-out}
 .fx-partner{transform-box:fill-box;transform-origin:center;animation:hitPartner 1.6s ease-out;filter:drop-shadow(0 0 5px #4ade80)}
-@media(prefers-reduced-motion:reduce){.fx-impact,.fx-opponent,.fx-partner{animation:none;filter:none}}
+.fx-move-ring{animation:moveRing .8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes moveRing{0%,100%{opacity:.45;stroke-width:1.5}50%{opacity:1;stroke-width:3}}
+@keyframes trailPulse{0%,100%{opacity:.15;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
+.fx-trail{transform-box:fill-box;transform-origin:center;animation:trailPulse .65s ease-in-out both}
+@media(prefers-reduced-motion:reduce){.fx-impact,.fx-opponent,.fx-partner,.fx-move-ring,.fx-trail{animation:none;filter:none;opacity:.7}}
 #su{border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:8px 0 2px;background:var(--card);font-size:13px}#su:empty{display:none}#su .sr{display:flex;align-items:center;gap:7px;margin:6px 0}#su .sr span{margin-left:auto;display:flex}#su .sr i{display:inline-block;width:11px;height:11px;border-radius:50%}.tg{font:inherit;font-size:12px;border:1px solid var(--bd);background:transparent;color:var(--fg);padding:4px 10px}.tg:first-child{border-radius:7px 0 0 7px}.tg:last-child{border-radius:0 7px 7px 0}.tg:only-child{border-radius:7px}.tg.on{background:#2f7de1;color:#fff;border-color:#2f7de1}#su .go{display:block;width:100%;margin-top:8px;padding:8px;font-weight:600}.ready{flex:1;padding:22px 8px;font:inherit;font-size:16px;font-weight:600;border:2px dashed var(--bd);border-radius:10px;background:var(--card);color:var(--fg)}
 
 /* Touch-friendly responsive layout */
@@ -109,7 +113,7 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
 <script>
 const N=18,CI=7,G=5,Y=-99,C6=['#3fae6a','#ee7fa8','#1b1b1b','#8b2a73','#4b2fa0','#7fb0e8'],N6=['You','Pink','Black','Magenta','Indigo','Sky'],C4=['#d93a3a','#1b1b1b','#2f9a55','#2a4fc4'],N4=['You','Black','Green','Blue'];let COL,NAME;
 const H={A:'out · 1',K:'out · 13',Q:'out · 12',J:'out · 11','7':'split 7','8':'back 8','9':'fwd + back',JK:'swap'};
-let hitFX=[],fxTimer=null,log=[],dsc='',curR='',NP,T,E,MR,SD,V,deck,disc,hands,pegs,turn,sel,selPeg,pend,over,msg,cap,stuck,teams,cur=[],who=[true,false,false,false,false,false],HN=1,vw=0,cover=false,setup=true,gid=0;
+let hitFX=[],fxTimer=null,trailFX=[],lastMove=null,log=[],dsc='',curR='',NP,T,E,MR,SD,V,deck,disc,hands,pegs,turn,sel,selPeg,pend,over,msg,cap,stuck,teams,cur=[],who=[true,false,false,false,false,false],HN=1,vw=0,cover=false,setup=true,gid=0;
 try{const w=JSON.parse(localStorage.getItem('marbles-who'));if(Array.isArray(w)&&w.length==6){who=w.map(Boolean);who[0]=true}}catch(e){}
 const hu=p=>!!who[p];
 const $=id=>document.getElementById(id),A=p=>p*N+CI,abs=(p,u)=>((A(p)+u)%T+T)%T,mate=(o,q)=>teams&&o!=q&&o%2==q%2,side=o=>[...Array(NP).keys()].filter(q=>q==o||mate(o,q)),done=o=>pegs[o].every(v=>v>E),ctl=p=>{if(teams)for(let i=0;i<NP;i+=2){const q=(p+i)%NP;if(!done(q))return q}return p},hid=(o,u)=>u>E?'s'+u:abs(o,u),tk=u=>u>-50&&u<=E,r1=x=>+x.toFixed(1);
@@ -150,7 +154,9 @@ if(c=='7'){const w=side(ow);const ownOut=P.some(v=>tk(v));if(ownOut){[0,1,2,3,4]
 else[0,1,2,3,4].forEach(k=>{for(let a=1;a<9;a++){sp(ow,k,fwd(ow,k,a),{t:'b',n:9-a,ow:[ow]});sp(ow,k,bwd(ow,k,a),{t:'f',n:9-a,ow:[ow]})}})}
 else{const n={A:1,K:13,Q:12,J:11}[c]||+c;P.forEach((v,k)=>add(ow,k,fwd(ow,k,n)))}return m}
 function step(o,k,to){const v=pegs[o][k],m=o==ctl(turn)?'a marble':(NAME[o]=='You'?'your marble':NAME[o]+'’s marble');let d=to-v;if(d>T/2)d-=T;
-dsc+=v<-50?'Brought a marble out. ':curR=='JK'?'Jumped '+m+' onto another marble. ':m[0].toUpperCase()+m.slice(1)+(d<0?' backed '+-d:' moved '+d)+(to>E&&v<=E?' into the safe area':'')+'. ';pegs[o][k]=to;if(to>E)return;const a=abs(o,to);pegs.forEach((Q,q)=>{if(q!=o)Q.forEach((u,j)=>{if(tk(u)&&abs(q,u)==a){hitFX.push({o,k,kind:'impact'},{o:q,k:j,kind:mate(q,o)?'partner':'opponent'});const w=NAME[q]=='You'?'Your':NAME[q]+'’s';if(mate(q,o)){if(curR=='JK'){pegs.forEach((R,r)=>{if(!mate(r,q))R.forEach((home,hk)=>{if(tk(home)&&abs(r,home)==abs(q,E)){R[hk]=Y;cap+=NAME[r]+"’s marble was knocked off the home gate and sent back to start. "}})})}let g=E;while(g>1-G&&(Q.includes(g)||pegs.some((R,r)=>r!=q&&R.some(w=>tk(w)&&abs(r,w)==abs(q,g)))))g--;Q[j]=g;cap+=w+' marble went to the home gate. '}else{Q[j]=Y;cap+=w+' marble went back to start. '}}})});if(hitFX.length){if(fxTimer)clearTimeout(fxTimer);fxTimer=setTimeout(()=>{hitFX=[];render()},2000)}}
+lastMove={o,k,from:v,to};trailFX=[];
+if(v>=0&&v<=E&&to>=0){const n=Math.abs(d),dir=d<0?-1:1;for(let i=1;i<n;i++){const u=v+i*dir;if(u>=0&&u<=E)trailFX.push({o,k,u,delay:(i-1)*.075})}}
+dsc+=v<-50?'Brought a marble out. ':curR=='JK'?'Jumped '+m+' onto another marble. ':m[0].toUpperCase()+m.slice(1)+(d<0?' backed '+-d:' moved '+d)+(to>E&&v<=E?' into the safe area':'')+'. ';pegs[o][k]=to;if(to>E)return;const a=abs(o,to);pegs.forEach((Q,q)=>{if(q!=o)Q.forEach((u,j)=>{if(tk(u)&&abs(q,u)==a){hitFX.push({o,k,kind:'impact'},{o:q,k:j,kind:mate(q,o)?'partner':'opponent'});const w=NAME[q]=='You'?'Your':NAME[q]+'’s';if(mate(q,o)){if(curR=='JK'){pegs.forEach((R,r)=>{if(!mate(r,q))R.forEach((home,hk)=>{if(tk(home)&&abs(r,home)==abs(q,E)){R[hk]=Y;cap+=NAME[r]+"’s marble was knocked off the home gate and sent back to start. "}})})}let g=E;while(g>1-G&&(Q.includes(g)||pegs.some((R,r)=>r!=q&&R.some(w=>tk(w)&&abs(r,w)==abs(q,g)))))g--;Q[j]=g;cap+=w+' marble went to the home gate. '}else{Q[j]=Y;cap+=w+' marble went back to start. '}}})});if(hitFX.length||trailFX.length||lastMove){if(fxTimer)clearTimeout(fxTimer);fxTimer=setTimeout(()=>{hitFX=[];trailFX=[];lastMove=null;render()},2200)}}
 const val=a=>{const v=pegs[a.o][a.k];let s=(a.out?30:0)+(a.to>E?40:0)+(v<-50?0:a.to-v)*(a.o==ctl(turn)?1:.5)+Math.random()*3;
 if(a.to<=E){const x=abs(a.o,a.to);pegs.forEach((Q,q)=>{if(q!=a.o)Q.forEach(u=>{if(tk(u)&&abs(q,u)==x)s+=mate(q,a.o)?15:50})})}return s};
 function act(p,ci,a){curR=rk(hands[p][ci]);if(a.out)stuck[p]=0;step(a.o,a.k,a.to);if(!a.rem)return fin(p,ci);const pd={rem:a.rem,ex:[a.o,a.k],ci};if(!second(pd).length)return fin(p,ci);
@@ -198,7 +204,9 @@ return s}
 function render(){cur=over||setup||cover||!hu(turn)?[]:pend?second(pend):sel!=null?moves(turn,hands[turn][sel]):[];
 $('b').setAttribute('viewBox',NP==6?'-10 20 420 360':'30 30 340 340');
 let s=board();
+trailFX.forEach(f=>{const[x,y]=pos(f.o,f.u,f.k);s+='<circle class="fx-trail" cx="'+x+'" cy="'+y+'" r="'+r1(MR*.72)+'" fill="#ffe36e" fill-opacity=".9" style="animation-delay:'+f.delay+'s"/>'});
 pegs.forEach((Q,p)=>Q.forEach((u,k)=>{const[x,y]=pos(p,u,k);s+=marble(x,y,p,k,hitFX.find(f=>f.o==p&&f.k==k)?.kind)}));
+if(lastMove){const [x,y]=pos(lastMove.o,pegs[lastMove.o][lastMove.k],lastMove.k);s+='<circle class="fx-move-ring" cx="'+x+'" cy="'+y+'" r="'+r1(MR*1.25)+'" fill="none" stroke="#ffe36e" stroke-width="2.5" pointer-events="none"/>'}
 const cq=a=>{if(a.to>E)return'#fff';const x=abs(a.o,a.to);let r='#fff';pegs.forEach((Q,q)=>{if(q!=a.o)Q.forEach(u=>{if(tk(u)&&abs(q,u)==x)r=mate(q,a.o)?'#4ade80':'#ff5a5a'})});return r};
 const ring=(x,y,r,f,fn,c)=>`<circle class="pulse" cx="${x}" cy="${y}" r="${r1(r)}" fill="${f}" stroke="${c||(THS[$('th').value]||THS.mid).hint}" stroke-width="1.5" onclick="${fn}" style="cursor:pointer"/>`;
 if(!selPeg){[...new Set(cur.map(a=>a.o*9+a.k))].forEach(id=>{const o=id/9|0,k=id%9,[x,y]=pos(o,pegs[o][k],k);s+=ring(x,y,MR*1.8,'transparent',`tap(${o},${k})`)});
