@@ -14,7 +14,7 @@ global.setTimeout = () => 0;
 const api = new Function(js + `
 return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,
   get speed(){return moveSpeed},
-  get s(){return {NP,T,E,CI,over,turn,pend,hands,SD,N}}}`)();
+  get s(){return {NP,T,E,CI,over,turn,pend,hands,SD,N,stuck,forcedCard}}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
@@ -52,8 +52,8 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   while (!api.s.over && guard++ < 8000) {
     s = api.s;
     if (s.turn === 0) {
-      const ci = s.hands[0].findIndex(c => api.moves(0, c).length);
-      if (ci < 0) api.forced(0, 0);
+      const ci = s.hands[0].findIndex((c, i) => (s.stuck[0] < 3 || i === s.forcedCard[0]) && api.moves(0, c).length);
+      if (ci < 0) { if (s.stuck[0] >= 3) { check(false, `${np} players: forced fourth card has no entry move`); break; } api.forced(0, 0); }
       else {
         api.act(0, ci, api.moves(0, s.hands[0][ci])[0]);
         const p = api.s.pend;
