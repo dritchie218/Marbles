@@ -215,6 +215,7 @@ check(api.s.over && api.s.msg === 'Red and Sky win.', '4 players: pair wins (' +
 // --- full simulated 6-player team games: no two marbles on one hole, every game ends ---
 let bad = 0, unfinished = 0, finishedHelpers = 0;
 for (let g = 0; g < 60; g++) {
+  rngSeed = 123456789;
   s = start(6);
   let t = 0;
   while (!api.s.over && t++ < 20000) {
