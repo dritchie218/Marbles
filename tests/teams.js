@@ -6,13 +6,15 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const js = html.match(/<script>([\s\S]*)<\/script>/)[1].replace(/\ninit\(\);\s*$/, '\n');
 
 const els = {};
+let rngSeed = 0x5eed;
+Math.random = () => { rngSeed = (Math.imul(rngSeed, 1664525) + 1013904223) >>> 0; return rngSeed / 4294967296; };
 const mk = () => ({ value: '4', checked: true, innerHTML: '', textContent: '', setAttribute() {} });
 global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 const api = new Function(js + `
 return {init,render,mate,side,ctl,moves,step,fin,ai,act,second,forced,pick,abs,tk,tp,A,
   setPegs(o,v){pegs[o]=v.slice()}, setHand(p,h){hands[p]=h.slice()}, setTurn(p){turn=p}, setStuck(p,n){stuck[p]=n}, setForcedCard(p,i){forcedCard[p]=i},
-  get s(){return {NP,T,E,Y,over,turn,pend,pegs,hands,msg,sel,forcedCard}}}`)();
+  setSetup(v){setup=v}, get s(){return {NP,T,E,Y,over,turn,pend,pegs,hands,msg,sel,forcedCard}}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
@@ -21,7 +23,7 @@ const start = (np, teams = true) => {
   els.tm = Object.assign(mk(), { checked: teams });
   els.cl = Object.assign(mk(), { value: 'Green' });
   els.th = Object.assign(mk(), { value: 'vik' });
-  api.init();
+  api.setSetup(false); api.init();
   return api.s;
 };
 
