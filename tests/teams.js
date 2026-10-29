@@ -11,7 +11,7 @@ global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 const api = new Function(js + `
 return {init,render,mate,side,ctl,moves,step,fin,ai,act,second,forced,abs,tk,tp,A,
-  setPegs(o,v){pegs[o]=v.slice()}, setHand(p,h){hands[p]=h.slice()}, setTurn(p){turn=p},
+  setPegs(o,v){pegs[o]=v.slice()}, setHand(p,h){hands[p]=h.slice()}, setTurn(p){turn=p}, setStuck(p,n){stuck[p]=n},
   get s(){return {NP,T,E,Y,over,turn,pend,pegs,hands,msg}}}`)();
 
 let failed = 0;
@@ -83,6 +83,17 @@ if (split) {
 for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
 api.setPegs(2, [8, s.Y, s.Y, s.Y, s.Y]);
 check(api.moves(0, '7|♠').length === 0, '7: unavailable when you have no marble in play, even if a teammate does');
+
+// --- fourth-card rule: after three unsuccessful discards, any card must bring a marble out ---
+s = start(4, false);
+for (let p = 0; p < 4; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
+api.setStuck(0, 3);
+let fourthCardMoves = api.moves(0, '7|♠');
+check(fourthCardMoves.length === 1 && fourthCardMoves[0].out && fourthCardMoves[0].to === 0,
+  'fourth card: a 7 is forced to bring a marble out, not played as a normal 7');
+fourthCardMoves = api.moves(0, 'JK|♠');
+check(fourthCardMoves.length === 1 && fourthCardMoves[0].out && fourthCardMoves[0].to === 0,
+  'fourth card: a Joker is forced to bring a marble out, not played as a swap');
 
 // --- Joker needs your own marble in play, but can move a teammate's marble ---
 for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
