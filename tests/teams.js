@@ -99,6 +99,11 @@ const teammateTarget = teammateTargetRel > s.E ? teammateTargetRel - s.T : teamm
 check(jokerMoves.some(m => m.o === 0 && m.k === 0 && m.to === teammateTarget), 'Joker: can target a teammate\'s marble with your own marble');
 
 check(![1, 3, 5].some(o => owners.has(o)), 'Joker: only the active player\'s marbles are moved');
+api.setPegs(0, [s.E + 1, s.E + 2, s.E + 3, s.E + 4, s.E + 5]);
+const playingForTeammate = api.moves(0, 'JK|♠');
+owners = new Set(playingForTeammate.map(m => m.o));
+check(api.ctl(0) === 2 && owners.size === 1 && owners.has(2), 'Joker: moves teammate\'s marble after you finish and play for them');
+
 // If a Joker displaces a partner to their home gate, an opponent occupying
 // that same gate is knocked off the board rather than blocking the partner.
 s = start(6);
@@ -121,10 +126,6 @@ if (collisionMove) {
   check(api.s.pegs[2][0] === s.E, 'Joker: displaced partner goes to their home gate');
   check(api.s.pegs[1][0] === s.Y, 'Joker: opponent occupying partner home gate is sent off the board');
 }
-api.setPegs(0, [s.E + 1, s.E + 2, s.E + 3, s.E + 4, s.E + 5]);
-const playingForTeammate = api.moves(0, 'JK|♠');
-owners = new Set(playingForTeammate.map(m => m.o));
-check(api.ctl(0) === 2 && owners.size === 1 && owners.has(2), 'Joker: moves teammate\'s marble after you finish and play for them');
 
 api.setPegs(0, [3, 20, s.Y, s.Y, s.Y]); // a 9 needs two of your own marbles out
 owners = new Set(api.moves(0, '9|♠').map(m => m.o));
