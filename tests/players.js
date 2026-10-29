@@ -14,7 +14,7 @@ global.setTimeout = f => { timers.push(f); return timers.length; };
 const api = new Function(js + `
 return {init,newGame,seat,start,ready,pick,act,ai,fin,step,second,forced,moves,render,hu,
   setWho(w){who=w.slice()}, setHand(p,h){hands[p]=h.slice()}, setPegs(o,v){pegs[o]=v.slice()},
-  get s(){return {NP,E,turn,vw,cover,setup,HN,NAME,who,hands,over,msg,pend,gid,log}}}`)();
+  get s(){return {NP,E,turn,vw,cover,setup,HN,NAME,who,hands,over,msg,pend,gid,log,stuck,forcedCard}}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
@@ -110,8 +110,8 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
     if (s.cover) api.ready();
     s = api.s;
     if (s.vw !== s.turn) peeks++;
-    const h = s.hands[s.turn], i = h.findIndex(c => api.moves(s.turn, c).length);
-    if (i < 0) { api.pick(0); continue; }
+    const h = s.hands[s.turn], i = h.findIndex((c, ci) => (s.stuck[s.turn] < 3 || ci === s.forcedCard[s.turn]) && api.moves(s.turn, c).length);
+    if (i < 0) { if (s.stuck[s.turn] >= 3) { unfinished++; break; } api.pick(0); continue; }
     const ms = api.moves(s.turn, h[i]); api.act(s.turn, i, ms[Math.random() * ms.length | 0]);
     const p = api.s.pend;
     if (p) { const l = api.second(p); const b = l[Math.random() * l.length | 0]; api.step(b.o, b.k, b.to); api.fin(api.s.turn, p.ci); }
