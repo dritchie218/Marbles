@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-let rngSeed = 0x5eed;
+let rngSeed = 123456789;
 Math.random = () => { rngSeed = (Math.imul(rngSeed, 1664525) + 1013904223) >>> 0; return rngSeed / 4294967296; };
 const js = html.match(/<script>([\s\S]*)<\/script>/)[1].replace(/\ninit\(\);\s*$/, '\n');
 
@@ -48,7 +48,7 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   const i = sorted.findIndex(x => Math.abs(x - co) < 0.6);
   check(i === 10 && sorted.length - 1 - i === 8, `${np} players: 10 holes left, 8 holes right of come-out`);
   let guard = 0;
-  while (!api.s.over && guard++ < 20000) {
+  while (!api.s.over && guard++ < 8000) {
     s = api.s;
     if (s.turn === 0) {
       const ci = s.hands[0].findIndex(c => api.moves(0, c).length);
