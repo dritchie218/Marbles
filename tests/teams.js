@@ -10,9 +10,9 @@ const mk = () => ({ value: '4', checked: true, innerHTML: '', textContent: '', s
 global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 const api = new Function(js + `
-return {init,render,mate,side,ctl,moves,step,fin,ai,act,second,forced,abs,tk,tp,A,
-  setPegs(o,v){pegs[o]=v.slice()}, setHand(p,h){hands[p]=h.slice()}, setTurn(p){turn=p}, setStuck(p,n){stuck[p]=n},
-  get s(){return {NP,T,E,Y,over,turn,pend,pegs,hands,msg}}}`)();
+return {init,render,mate,side,ctl,moves,step,fin,ai,act,second,forced,pick,abs,tk,tp,A,
+  setPegs(o,v){pegs[o]=v.slice()}, setHand(p,h){hands[p]=h.slice()}, setTurn(p){turn=p}, setStuck(p,n){stuck[p]=n}, setForcedCard(p,i){forcedCard[p]=i},
+  get s(){return {NP,T,E,Y,over,turn,pend,pegs,hands,msg,sel,forcedCard}}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
@@ -101,6 +101,16 @@ check(fourthCardMoves.length === 1 && fourthCardMoves[0].out && fourthCardMoves[
 fourthCardMoves = api.moves(0, 'JK|♠');
 check(fourthCardMoves.length === 1 && fourthCardMoves[0].out && fourthCardMoves[0].to === 0,
   'fourth card: a Joker is forced to bring a marble out, not played as a swap');
+
+// The forced entry must use the newly drawn fourth card, not any card already in hand.
+api.setHand(0, ['2|♠', '3|♠', '4|♠', '5|♠', '6|♠', '7|♠']);
+api.setStuck(0, 3); api.setForcedCard(0, 5); api.setTurn(0); api.render();
+check(/disabled/.test(els.hand.innerHTML) && (els.hand.innerHTML.match(/disabled/g) || []).length === 5,
+  'fourth draw UI: the five cards already in hand are disabled');
+api.pick(0);
+check(api.s.sel == null, 'fourth draw UI: tapping an older card does not select it');
+api.pick(5);
+check(api.s.sel === 5, 'fourth draw UI: only the newly drawn card can be selected');
 
 // --- Joker needs your own marble in play, but can move a teammate's marble ---
 s = start(6);
