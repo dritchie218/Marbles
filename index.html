@@ -84,7 +84,7 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
 <p class="c"><b>The Joker Game “Marbles”</b></p>
 <p><b>USE THREE DECKS OF CARDS</b> regardless of the number of players</p>
 <p><b>DEAL</b> five cards; draw a sixth card before playing one of the cards</p>
-<p><b>TO GET A MARBLE OUT</b> of start position – play an Ace, King, Queen, or Jack. When not able to play, lay any card crosswise on your pile for three times or until you get a come-out card; come out and play fourth card no matter what it is</p>
+<p><b>TO GET A MARBLE OUT</b> of start position – play an Ace, King, Queen, or Jack. When not able to play, lay any card crosswise on your pile for three times or until you get a come-out card; after three unsuccessful discards, the fourth card must be used to bring a marble out, whatever the card is</p>
 <p><b>FORWARD MOVES</b></p>
 <p class="i">A=1, 2=2, 3=3, 4=4, 5=5, 6=6, 10=10,<br>Jack=11, Queen=12, King=13</p>
 <p><b>SPECIAL CARDS</b></p>
@@ -134,7 +134,7 @@ function bwd(o,k,n){const P=pegs[o],v=P[k];if(v<-50||v>E)return null;let q=v;for
 const second=({rem:r,ex})=>{const l=[];r.ow.forEach(o=>pegs[o].forEach((v,k)=>{if(o==ex[0]&&k==ex[1])return;const t=r.t=='f'?fwd(o,k,r.n):bwd(o,k,r.n);if(t!=null)l.push({o,k,to:t})}));return l};
 const rk=c=>c.split('|')[0],cname=c=>{const[r,s]=c.split('|');return r=='JK'?'Joker':r+s},addLog=(p,t)=>{log.unshift({p,t});if(log.length>80)log.pop()};
 function moves(p,c){c=rk(c);const ow=ctl(p),P=pegs[ow],m=[],add=(o,k,t,x)=>{if(t!=null)m.push({o,k,to:t,...x})};
-if(stuck[p]>=3||['A','K','Q','J'].includes(c)){const k=P.indexOf(Y);if(k>=0&&!P.some(u=>tk(u)&&hid(ow,u)==hid(ow,0)))add(ow,k,0,{out:1})}
+if(stuck[p]>=3){const k=P.indexOf(Y);if(k>=0&&!P.some(u=>tk(u)&&hid(ow,u)==hid(ow,0)))add(ow,k,0,{out:1});return m}if(['A','K','Q','J'].includes(c)){const k=P.indexOf(Y);if(k>=0&&!P.some(u=>tk(u)&&hid(ow,u)==hid(ow,0)))add(ow,k,0,{out:1})}
 const tr=[0,1,2,3,4].filter(k=>tk(P[k]));
 if(c=='JK'){if(P.some(tk))[ow].forEach(o=>pegs[o].forEach((v,k)=>{if(tk(v))pegs.forEach((Q,q)=>{if(q!=o)Q.forEach(u=>{if(tk(u)){const t0=(abs(q,u)-A(o)+T)%T,t=t0>E?t0-T:t0;if(!pegs[o].some(w=>tk(w)&&hid(o,w)==hid(o,t)))add(o,k,t)}})})}))}
 else if(c=='8')tr.forEach(k=>add(ow,k,bwd(ow,k,8)));
