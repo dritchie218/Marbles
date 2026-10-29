@@ -30,6 +30,45 @@ details{font-size:13px;margin-top:12px;line-height:1.5}
 .rules p{margin:0 0 10px}.rules .i{margin-left:20px}.rules .c{text-align:center}
 @keyframes p{50%{opacity:.3}}.pulse{animation:p 1s infinite}
 #su{border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:8px 0 2px;background:var(--card);font-size:13px}#su:empty{display:none}#su .sr{display:flex;align-items:center;gap:7px;margin:6px 0}#su .sr span{margin-left:auto;display:flex}#su .sr i{display:inline-block;width:11px;height:11px;border-radius:50%}.tg{font:inherit;font-size:12px;border:1px solid var(--bd);background:transparent;color:var(--fg);padding:4px 10px}.tg:first-child{border-radius:7px 0 0 7px}.tg:last-child{border-radius:0 7px 7px 0}.tg:only-child{border-radius:7px}.tg.on{background:#2f7de1;color:#fff;border-color:#2f7de1}#su .go{display:block;width:100%;margin-top:8px;padding:8px;font-weight:600}.ready{flex:1;padding:22px 8px;font:inherit;font-size:16px;font-weight:600;border:2px dashed var(--bd);border-radius:10px;background:var(--card);color:var(--fg)}
+
+/* Touch-friendly responsive layout */
+#app{max-width:680px;padding:4px 8px calc(18px + env(safe-area-inset-bottom,0px))}
+h1{font-size:24px;margin:4px 0 8px}
+#ctl{display:flex;flex-wrap:wrap;gap:7px 9px;align-items:center;font-size:16px;margin-bottom:2px}
+#ctl select{font-size:16px;min-height:40px;max-width:100%;padding:5px 7px}
+#ctl label{display:inline-flex;align-items:center;gap:5px;min-height:40px}
+#ctl input[type=checkbox]{width:22px;height:22px}
+#b{width:100%;max-width:680px;margin:0 auto;touch-action:manipulation}
+#hand{gap:6px;overflow-x:auto;align-items:stretch;padding:8px 2px 12px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.card{flex:0 0 clamp(54px,calc((100vw - 58px)/6),82px);min-height:100px;padding:5px 3px;scroll-snap-align:start;touch-action:manipulation}
+.card svg{width:100%;max-width:76px}
+.card small{font-size:11px;line-height:1.2;text-align:center}
+.card.on{transform:translateY(-3px)}
+button.n{font-size:15px;min-height:40px;padding:7px 12px;touch-action:manipulation}
+.tg{font-size:14px;min-height:38px;padding:6px 11px;touch-action:manipulation}
+#st{font-size:17px;line-height:1.35;min-height:26px;margin:7px 0 2px}
+#lg{font-size:14px;line-height:1.4}
+#tl{font-size:13px;line-height:1.7}
+#su{font-size:15px;padding:10px 12px}
+#su .sr{min-height:36px;gap:9px}
+#su .sr i{width:13px;height:13px;flex-shrink:0}
+#su .go{min-height:48px;font-size:17px}
+.ready{min-height:64px;font-size:17px}
+details{font-size:15px}
+details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
+#log{max-height:130px;font-size:14px}
+#guide{font-size:14px;padding:8px 0}
+@media(min-width:600px){
+  #app{padding-left:12px;padding-right:12px}
+  #b{max-height:none}
+  .card{flex-basis:72px}
+}
+@media(max-width:380px){
+  #app{padding-left:5px;padding-right:5px}
+  h1{font-size:22px}
+  #ctl{gap:5px 7px}
+  .card{flex-basis:52px}
+}
 </style></head><body><div id="app">
 <h1>Marbles <button class="n" onclick="newGame()">New game</button></h1>
 <div id="ctl"><select id="np" onchange="newGame()"><option value="4" selected>4 players</option><option value="6">6 players</option></select>
