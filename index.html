@@ -17,7 +17,7 @@ h1{font-size:20px;margin:6px 0;display:flex;justify-content:space-between;align-
 #ctl{display:flex;gap:10px;align-items:center;font-size:13px;margin-bottom:4px}
 select{font:inherit;font-size:13px}
 svg{width:100%;height:auto;display:block}
-#st{font-weight:600;min-height:22px;margin:6px 0 0}#lg{font-size:13px;opacity:.75;min-height:18px;margin:2px 0 8px}
+#st{font-weight:600;min-height:22px;margin:6px 0 0}#dc{border:1px solid var(--bd);border-radius:9px;padding:7px 10px;margin:5px 0;background:var(--card);font-size:13px}#dc:empty{display:none}#dc .sr{display:flex;align-items:center;gap:7px;margin:4px 0;min-height:22px}#dc .name{font-weight:600}#dc .dots{display:inline-flex;gap:4px;margin-left:auto;align-items:center}#dc .dot{display:inline-block;width:11px;height:11px;border:1.5px solid var(--bd);border-radius:50%}#dc .note{font-weight:600;margin-left:5px}#lg{font-size:13px;opacity:.75;min-height:18px;margin:2px 0 8px}
 #hand{display:flex;gap:4px}
 #tl{font-size:12px;opacity:.85;margin:4px 0 0;line-height:1.6}#tl:empty{display:none}#tl i{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 3px 0 5px;vertical-align:-1px}
 .card{flex:1;min-width:0;min-height:66px;border:2px solid var(--bd);border-radius:9px;background:var(--card);color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit;padding:4px 0}
@@ -46,7 +46,7 @@ h1{font-size:24px;margin:4px 0 8px}
 .card.on{transform:translateY(-3px)}
 button.n{font-size:15px;min-height:40px;padding:7px 12px;touch-action:manipulation}
 .tg{font-size:14px;min-height:38px;padding:6px 11px;touch-action:manipulation}
-#st{font-size:17px;line-height:1.35;min-height:26px;margin:7px 0 2px}
+#st{font-size:17px;line-height:1.35;min-height:26px;margin:7px 0 2px}#dc{font-size:15px;padding:8px 10px}#dc .sr{min-height:30px}#dc .dot{width:13px;height:13px}
 #lg{font-size:14px;line-height:1.4}
 #tl{font-size:13px;line-height:1.7}
 #su{font-size:15px;padding:10px 12px}
@@ -78,7 +78,7 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
 <svg id="b" viewBox="0 0 400 400"></svg>
 <div id="tl"></div>
 <div id="su"></div>
-<div id="st"></div><div id="lg"></div><div id="hand"></div>
+<div id="st"></div><div id="dc" aria-live="polite"></div><div id="lg"></div><div id="hand"></div>
 <details open><summary>Move log</summary><div id="log"></div></details>
 <details><summary>Rules</summary><div class="rules">
 <p class="c"><b>The Joker Game “Marbles”</b></p>
@@ -203,6 +203,7 @@ $('su').innerHTML=setup?'<b>Who’s playing?</b>'+[...Array(NP).keys()].map(p=>`
 $('hand').innerHTML=setup?'':cover?`<button class="ready" onclick="ready()">Pass to ${NAME[turn]} · tap when ready</button>`:hands[vw].map((c,i)=>`<button class="card${i==sel?' on':''}" onclick="pick(${i})">${cardSvg(c)}<small>${H[rk(c)]||'move '+rk(c)}</small></button>`).join('');
 $('log').innerHTML=log.slice(0,40).map(e=>`<div><i style="background:${COL[e.p]}"></i>${e.t}</div>`).join('');
 $('st').textContent=over?msg:setup?'Choose who is playing, then tap Start game.':!hu(turn)?NAME[turn]+' is playing…':cover?'Pass the phone to '+NAME[turn]+'.':pend?`Now move another marble ${pend.rem.t=='f'?'forward':'back'} ${pend.rem.n}.`:noMoves()?'No legal move. Tap a card to discard it.':sel==null?(stuck[turn]>=3?'Any card brings a marble out. ':'')+(HN>1?NAME[turn]+'’s turn':'Your turn')+': pick a card.':selPeg?'Tap where to go.':'Tap a pulsing marble.';
+$('dc').innerHTML=setup?'':stuck.some(n=>n>0)?stuck.map((n,p)=>n>0&&pegs[p].includes(Y)?`<div class="sr"><i class="dot" style="background:${COL[p]};border-color:${COL[p]}"></i><span class="name">${NAME[p]}:</span> discard ${Math.min(n,3)} of 3 <span class="dots">${[0,1,2].map(i=>`<i class="dot" style="${i<n?`background:${COL[p]};border-color:${COL[p]}`:''}"></i>`).join('')}</span>${n>=3?'<span class="note">Any card brings a marble out!</span>':''}</div>`:'').join(''):'';
 $('lg').textContent=over?'':sel!=null&&hu(turn)&&!cover&&!pend&&!selPeg?'Dashed rings show every landing spot. Red sends an opponent back to start; green sends a teammate to their home gate.':msg}
 if(typeof navigator!='undefined'&&'serviceWorker'in navigator&&location.protocol=='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 init();
