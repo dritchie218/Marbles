@@ -164,19 +164,20 @@ api.step(0, 0, 12); check(api.s.pegs[2][0] === E, 'landing on a teammate (seat 2
 api.step(0, 0, 13); check(api.s.pegs[4][0] === E, 'landing on a teammate (seat 4) sends them to their home gate');
 api.step(0, 0, 14); check(api.s.pegs[1][0] === s.Y, 'landing on an opponent sends them to start');
 
-// A teammate already occupying their home gate cannot be pushed back one space.
+// If a teammate's home gate is full, don't bump their other marble backward.
 s = start(6);
 for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
-const partnerGateTarget = at(0, 2, s.E);
-api.setPegs(0, [partnerGateTarget - 2, s.Y, s.Y, s.Y, s.Y]);
-api.setPegs(2, [s.E, s.Y, s.Y, s.Y, s.Y]);
+const partnerTrackTarget = 12;
+const partnerTrackRel = at(0, 2, partnerTrackTarget);
+api.setPegs(0, [partnerTrackTarget - 2, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(2, [partnerTrackRel, s.E, s.Y, s.Y, s.Y]);
 const gateLandingMoves = api.moves(0, '2|♠');
-check(!gateLandingMoves.some(m => m.o === 0 && m.to === partnerGateTarget),
-  'movement: cannot land on a teammate already occupying their home gate');
+check(!gateLandingMoves.some(m => m.o === 0 && m.to === partnerTrackTarget),
+  'movement: cannot bump a teammate backward when their home gate is full');
 api.setPegs(0, [10, s.Y, s.Y, s.Y, s.Y]);
 const gateJokerMoves = api.moves(0, 'JK|♠');
-check(!gateJokerMoves.some(m => m.o === 0 && m.to === partnerGateTarget),
-  'Joker: cannot displace a teammate already occupying their home gate');
+check(!gateJokerMoves.some(m => m.o === 0 && m.to === partnerTrackTarget),
+  'Joker: cannot bump a teammate backward when their home gate is full');
 
 // --- winning needs the whole team ---
 s = start(6);
