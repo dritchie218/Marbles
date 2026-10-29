@@ -10,11 +10,19 @@ global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 
 const api = new Function(js + `
-return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,
+return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,
+  get speed(){return moveSpeed},
   get s(){return {NP,T,E,CI,over,turn,pend,hands,SD,N}}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
+
+// --- animation speed controls ---
+check(html.includes('id="speed"') && html.includes('>Slow</option>') && html.includes('>Normal</option>') && html.includes('>Fast</option>'), 'move speed selector offers Slow, Normal and Fast');
+api.setSpeed('slow'); check(api.speed === 'slow' && api.speedDelay() > 0.3 && api.speedDuration() === 5000, 'Slow mode gives space markers and announcements more time');
+api.setSpeed('normal'); check(api.speed === 'normal' && api.speedDelay() < 0.2 && api.speedDuration() === 2800, 'Normal mode uses default move timing');
+api.setSpeed('fast'); check(api.speed === 'fast' && api.speedDelay() < 0.1 && api.speedDuration() === 1000, 'Fast mode shortens move timing');
+api.setSpeed('normal');
 
 for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], ['4', 'Red', 'vik'], ['6', 'Pink', 'wild'], ['4', 'Sky', 'twn']]) {
   els.np = Object.assign(mk(), { value: np });
