@@ -29,6 +29,7 @@ api.setSpeed('fast'); check(api.speed === 'fast' && api.speedDelay() < 0.1 && ap
 api.setSpeed('normal');
 
 for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], ['4', 'Red', 'vik'], ['6', 'Pink', 'wild'], ['4', 'Sky', 'twn']]) {
+  rngSeed = 123456789;
   els.np = Object.assign(mk(), { value: np });
   els.cl = Object.assign(mk(), { value: color });
   els.th = Object.assign(mk(), { value: theme });
