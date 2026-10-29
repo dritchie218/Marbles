@@ -107,6 +107,8 @@ api.setHand(0, ['2|♠', '3|♠', '4|♠', '5|♠', '6|♠', '7|♠']);
 api.setStuck(0, 3); api.setForcedCard(0, 5); api.setTurn(0); api.render();
 check(/disabled/.test(els.hand.innerHTML) && (els.hand.innerHTML.match(/disabled/g) || []).length === 5,
   'fourth draw UI: the five cards already in hand are disabled');
+check(!els.dc.innerHTML.includes('Any card brings a marble out') && els.dc.innerHTML.includes('Use the newly drawn card'),
+  'fourth draw UI: discard tracker does not claim any card can be used');
 api.pick(0);
 check(api.s.sel == null, 'fourth draw UI: tapping an older card does not select it');
 api.pick(5);
