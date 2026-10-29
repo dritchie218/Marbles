@@ -38,6 +38,8 @@ check(api.s.who[2] === true && api.s.who[0] === true, 'tapping Person sets the s
 api.start();
 check(!api.s.setup && api.s.HN === 2 && els.su.innerHTML === '', 'Start game closes setup and starts with the chosen people');
 check(api.s.NAME.join() === 'Green,Red,Gold,Sky', 'with several people, everyone is called by colour (no "You")');
+// Deterministic legal move: a random opening hand can contain no playable card.
+api.setHand(0, ['A|♠', '2|♠', '3|♠', '4|♠', '5|♠', '6|♠']); api.render();
 check(/^Green’s turn: pick a card\.$/.test(els.st.textContent), 'status names whose turn it is (' + els.st.textContent + ')');
 opts(6); api.newGame();
 check((els.su.innerHTML.match(/class="sr"/g) || []).length === 6, '6 players: six seat rows');
