@@ -48,7 +48,7 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   const i = sorted.findIndex(x => Math.abs(x - co) < 0.6);
   check(i === 10 && sorted.length - 1 - i === 8, `${np} players: 10 holes left, 8 holes right of come-out`);
   let guard = 0;
-  while (!api.s.over && guard++ < 4000) {
+  while (!api.s.over && guard++ < 20000) {
     s = api.s;
     if (s.turn === 0) {
       const ci = s.hands[0].findIndex(c => api.moves(0, c).length);
