@@ -139,7 +139,7 @@ const tr=[0,1,2,3,4].filter(k=>tk(P[k]));
 if(c=='JK')tr.forEach(k=>pegs.forEach((Q,q)=>{if(q!=ow)Q.forEach(u=>{if(tk(u)){const t0=(abs(q,u)-A(ow)+T)%T,t=t0>E?t0-T:t0;if(!P.some(w=>tk(w)&&hid(ow,w)==hid(ow,t)))add(ow,k,t)}})}));
 else if(c=='8')tr.forEach(k=>add(ow,k,bwd(ow,k,8)));
 else if(c=='7'||c=='9'){const sp=(o,k,t,r)=>{if(t==null)return;const v=pegs[o][k];pegs[o][k]=t;const ok=second({rem:r,ex:[o,k]}).length;pegs[o][k]=v;if(ok)m.push({o,k,to:t,rem:r})};
-if(c=='7'){const w=side(ow);w.forEach(o=>[0,1,2,3,4].forEach(k=>{add(o,k,fwd(o,k,7));for(let a=1;a<7;a++)sp(o,k,fwd(o,k,a),{t:'f',n:7-a,ow:w})}))}
+if(c=='7'){const w=side(ow);const ownOut=P.some(v=>tk(v));if(ownOut){[0,1,2,3,4].forEach(k=>{if(tk(P[k])){add(ow,k,fwd(ow,k,7));for(let a=1;a<7;a++)sp(ow,k,fwd(ow,k,a),{t:'f',n:7-a,ow:w})}})}}
 else[0,1,2,3,4].forEach(k=>{for(let a=1;a<9;a++){sp(ow,k,fwd(ow,k,a),{t:'b',n:9-a,ow:[ow]});sp(ow,k,bwd(ow,k,a),{t:'f',n:9-a,ow:[ow]})}})}
 else{const n={A:1,K:13,Q:12,J:11}[c]||+c;P.forEach((v,k)=>add(ow,k,fwd(ow,k,n)))}return m}
 function step(o,k,to){const v=pegs[o][k],m=o==ctl(turn)?'a marble':(NAME[o]=='You'?'your marble':NAME[o]+'’s marble');let d=to-v;if(d>T/2)d-=T;
