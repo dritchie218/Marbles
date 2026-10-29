@@ -214,7 +214,7 @@ if(!selPeg){[...new Set(cur.map(a=>a.o*9+a.k))].forEach(id=>{const o=id/9|0,k=id
 cur.forEach(a=>{const[x,y]=pos(a.o,a.to,a.k);s+=`<circle cx="${x}" cy="${y}" r="${r1(MR*.9)}" fill="none" stroke="${cq(a)}" stroke-width="1.6" stroke-dasharray="2 2" pointer-events="none"/>`})}
 else cur.forEach((a,i)=>{if(a.o==selPeg[0]&&a.k==selPeg[1]){const[x,y]=pos(a.o,a.to,a.k);s+=ring(x,y,MR*1.5,'rgba(255,255,255,.4)',`go(${i})`,cq(a))}});
 $('b').innerHTML=s;
-$('mv').textContent=moveNotice;$('mv').classList.toggle('show',!!moveNotice);
+if($('mv')){$('mv').textContent=moveNotice;$('mv').classList?.toggle('show',!!moveNotice)}
 $('tl').innerHTML=teams?(HN>1?['Team 1','Team 2']:['Your team','Opponents']).map((t,i)=>t+':'+side(i).map(q=>`<i style="background:${COL[q]}"></i>${NAME[q]}`).join('')).join(' &nbsp;·&nbsp; ')+(!over&&ctl(vw)!=vw?` &nbsp;·&nbsp; <b>${HN>1?NAME[vw]+' is playing':'Playing'} for ${NAME[ctl(vw)]}</b>`:''):'';
 $('su').innerHTML=setup?'<b>Who’s playing?</b>'+[...Array(NP).keys()].map(p=>`<div class="sr"><i style="background:${COL[p]}"></i>${PAL.find(x=>x.c==COL[p]).n}${p?'':' (you)'}<span>${p?['Computer','Person'].map((t,i)=>`<button class="tg${+who[p]==i?' on':''}" onclick="seat(${p},${i})">${t}</button>`).join(''):'<button class="tg on" disabled>Person</button>'}</span></div>`).join('')+'<button class="n go" onclick="start()">Start game</button>':'';
 $('hand').innerHTML=setup?'':cover?`<button class="ready" onclick="ready()">Pass to ${NAME[turn]} · tap when ready</button>`:hands[vw].map((c,i)=>`<button class="card${i==sel?' on':''}" onclick="pick(${i})">${cardSvg(c)}<small>${H[rk(c)]||'move '+rk(c)}</small></button>`).join('');
