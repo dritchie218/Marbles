@@ -19,6 +19,8 @@ const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!o
 
 // --- animation speed controls ---
 check(html.includes('id="speed"') && html.includes('>Slow</option>') && html.includes('>Normal</option>') && html.includes('>Fast</option>'), 'move speed selector offers Slow, Normal and Fast');
+check(html.includes('<animateMotion path="${movePath}"') && html.includes('const movingTrack=') && html.includes("marble(0,0,lastMove.o,lastMove.k,'active-move')"), 'marble animates along intermediate track spaces with a moving highlight');
+check(html.includes('id="mv" aria-live="polite"') && html.includes('moveNotice'), 'move announcement is exposed to screen readers');
 api.setSpeed('slow'); check(api.speed === 'slow' && api.speedDelay() > 0.3 && api.speedDuration() === 5000, 'Slow mode gives space markers and announcements more time');
 api.setSpeed('normal'); check(api.speed === 'normal' && api.speedDelay() < 0.2 && api.speedDuration() === 2800, 'Normal mode uses default move timing');
 api.setSpeed('fast'); check(api.speed === 'fast' && api.speedDelay() < 0.1 && api.speedDuration() === 1000, 'Fast mode shortens move timing');
