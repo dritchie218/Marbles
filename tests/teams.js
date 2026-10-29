@@ -71,14 +71,21 @@ check(api.ctl(0) === 2, '4 players: finished player plays for partner (unchanged
 s = start(6);
 for (let p = 0; p < 6; p++) api.setPegs(p, [3 + p, s.Y, s.Y, s.Y, s.Y]);
 let sevenMoves = api.moves(0, '7|♠');
-let owners = new Set(sevenMoves.map(m => m.o));
-check(owners.size === 1 && owners.has(0) && sevenMoves.every(m => m.o === 0), '7: first move must use your own marble');
-const split = sevenMoves.find(m => m.rem);
-check(!!split, '7: legal split moves are offered when available');
+let owners = new Set(sevenMoves.filter(m => !m.rem).map(m => m.o));
+check(owners.size === 1 && owners.has(0), '7: a full seven must move your own marble');
+const split = sevenMoves.find(m => m.rem && m.o === 0);
+check(!!split, '7: own-marble-first split moves are offered when available');
 if (split) {
   owners = new Set(api.second({ rem: split.rem, ex: [split.o, split.k] }).map(m => m.o));
-  check(owners.has(2) || owners.has(4), '7 split: remaining movement can use a teammate');
+  check(owners.has(2) || owners.has(4), '7 split: after moving your marble first, remaining movement can use a teammate');
   check(![1, 3, 5].some(o => owners.has(o)), '7 split: remaining movement cannot use an opponent');
+}
+const teammateFirst = sevenMoves.find(m => m.rem && (m.o === 2 || m.o === 4));
+check(!!teammateFirst, '7 split: can move a teammate first when your marble can move afterward');
+if (teammateFirst) {
+  const remaining = api.second({ rem: teammateFirst.rem, ex: [teammateFirst.o, teammateFirst.k] });
+  check(remaining.some(m => m.o === 0), '7 split: teammate-first move leaves at least one space for your own marble');
+  check(remaining.every(m => m.o === 0), '7 split: teammate-first move must finish with your own marble');
 }
 for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
 api.setPegs(2, [8, s.Y, s.Y, s.Y, s.Y]);
