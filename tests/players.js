@@ -2,6 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+let rngSeed = 123456789;
+Math.random = () => { rngSeed = (Math.imul(rngSeed, 1664525) + 1013904223) >>> 0; return rngSeed / 4294967296; };
 const js = html.match(/<script>([\s\S]*)<\/script>/)[1].replace(/\ninit\(\);\s*$/, '\n');
 
 const els = {};
@@ -99,6 +101,7 @@ check(api.s.over && api.s.msg === 'Gold wins! 🎉', 'individual person win mess
 const mixes = [['4', true, [1, 1, 0, 0]], ['4', true, [1, 1, 1, 1]], ['6', true, [1, 0, 1, 1, 0, 0]], ['6', false, [1, 1, 1, 1, 1, 1]], ['4', false, [1, 0, 1, 0]]];
 let unfinished = 0, peeks = 0, games = 0;
 for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
+  rngSeed = 123456789;
   opts(np, tm); api.setWho([...w, 0, 0, 0, 0, 0, 0].slice(0, 6).map(Boolean)); api.init(); games++;
   let n = 0;
   while (!api.s.over && n++ < 20000) {
