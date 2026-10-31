@@ -8,7 +8,7 @@ check(html.includes('@supabase/supabase-js@2'), 'Supabase browser client is load
 check(html.includes('Guest · Play without email'), 'guest mode is the default and requires no email');
 check(html.includes('signInWithOtp'), 'email magic-link sign-in is implemented');
 check(html.includes('emailRedirectTo:location.href'), 'magic link returns to the current Marbles page');
-check(html.includes('player_profiles').includes ? true : true, 'profile API is referenced');
+check(html.includes("from('player_profiles').select('id,screen_name,avatar')"), 'profile data is loaded from Supabase');
 check(html.includes("upsert({id:cloudUser.id,screen_name}"), 'signed-in players can save their screen name');
 check(html.includes("from('player_leaderboard')"), 'cloud profile loads lifetime game statistics');
 check(html.includes("rpc('record_my_match'"), 'completed game result is sent through the protected RPC');
