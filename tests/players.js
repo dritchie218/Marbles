@@ -13,7 +13,7 @@ const timers = [];
 global.setTimeout = f => { timers.push(f); return timers.length; };
 const api = new Function(js + `
 return {init,newGame,seat,start,ready,pick,act,ai,fin,step,second,forced,moves,render,hu,
-  setWho(w){who=w.slice()}, setHand(p,h){hands[p]=h.slice()}, setPegs(o,v){pegs[o]=v.slice()},
+  setWho(w){who=w.slice()}, setHand(p,h){hands[p]=h.slice()}, setPegs(o,v){pegs[o]=v.slice()}, setStuck(p,n){stuck[p]=n},
   get s(){return {NP,E,T,turn,vw,cover,setup,HN,NAME,who,hands,pegs,over,msg,pend,gid,log,stuck,forcedCard}}}`)();
 
 let failed = 0;
@@ -140,10 +140,10 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
     if (s.cover) api.ready();
     s = api.s;
     if (s.vw !== s.turn) peeks++;
-    const h = s.hands[s.turn], i = h.findIndex((c, ci) => (s.stuck[s.turn] < 3 || ci === s.forcedCard[s.turn]) && api.moves(s.turn, c).length);
+    const h = s.hands[s.turn], i = h.findIndex((c, ci) => (s.forcedCard[s.turn] == null || ci === s.forcedCard[s.turn]) && api.moves(s.turn, c).length);
     if (i < 0) {
-      if (s.stuck[s.turn] >= 3) { failure = 'three failed draws with no forced legal move'; break; }
-      api.pick(0);
+      if (s.stuck[s.turn] >= 3 && s.forcedCard[s.turn] != null) { failure = 'forced draw was assigned but no legal entry move exists'; break; }
+      api.forced(s.turn, Math.random() * h.length | 0);
       if (api.s.over) break;
       continue;
     }
