@@ -86,7 +86,7 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
 <label><input type="checkbox" id="tm" checked onchange="newGame()"> Teams</label>
 <label>You: <select id="cl" onchange="newGame()"><option>Green</option><option>Red</option><option>Gold</option><option>Sky</option><option>Indigo</option><option>Pink</option></select></label>
 <label>Moves: <select id="speed" onchange="setSpeed(this.value)"><option value="slow">Slow</option><option value="normal" selected>Normal</option><option value="fast">Fast</option></select></label>
-<select id="th" onchange="render()"><option value="mid">Midnight</option><option value="oak">Oak</option><option value="vik" selected>MN football (purple &amp; gold)</option><option value="wild">MN hockey (green &amp; red)</option><option value="twn">MN baseball (navy &amp; red)</option></select><label>Cards: <select id="cardTheme" onchange="setCardTheme(this.value)"><option value="auto" selected>Auto (by board)</option><option value="classic">Classic</option><option value="royal">Royal Casino</option><option value="west">Wild West</option><option value="fantasy">Fantasy Kingdom</option><option value="world">World Tour</option><option value="neon">Neon Arcade</option><option value="championship">Championship</option></select></label></div>
+<select id="th" onchange="render()"><option value="mid">Midnight</option><option value="oak">Oak</option><option value="vik" selected>MN football (purple &amp; gold)</option><option value="wild">MN hockey (green &amp; red)</option><option value="twn">MN baseball (navy &amp; red)</option></select></div>
 <div id="boardWrap"><svg id="b" viewBox="0 0 400 400"></svg><div id="winner" role="status" aria-live="assertive" hidden><div class="trophy" aria-hidden="true">🏆</div><div class="headline" id="winnerTitle"></div><div class="names" id="winnerNames"></div><div class="detail">All winning marbles are home.</div><button type="button" onclick="newGame()">New Game</button></div></div>
 <div id="mv" aria-live="polite"></div>
 <div id="tl"></div>
@@ -130,56 +130,14 @@ const HP=[[0,1],[1,0],[0,-1],[-1,0],[0,0]],SF=[[3,1],[3,2],[3,3],[4,3],[5,3]];
 function pos(p,u,k){if(u<-50)return W(p,CI+1+HP[k][0],2+HP[k][1]);if(u<=E)return tp(abs(p,u));return W(p,...SF[u-E-1])}
 const SU={'♠':'#1b1f2a','♣':'#1b1f2a','♥':'#d1332e','♦':'#d1332e'},P4=[['l',20],['r',20],['l',64],['r',64]],P6=[...P4,['l',42],['r',42]],PX={l:19,c:30,r:41};
 const PIPS={'2':[['c',20],['c',64]],'3':[['c',20],['c',42],['c',64]],'4':P4,'5':[...P4,['c',42]],'6':P6,'7':[...P6,['c',31]],'8':[...P6,['c',31],['c',53]],'9':[...P4,['l',33],['r',33],['l',51],['r',51],['c',42]],'10':[...P4,['l',33],['r',33],['l',51],['r',51],['c',26.5],['c',57.5]]};
-const CARD_THEMES={
-classic:{edge:'#8b8172',accent:'#d4cbbb',ink:'#292722',bg:'#fffefa',panel:'#f7f3eb',mark:'✦',kind:'classic'},
-royal:{edge:'#b58a2b',accent:'#f0d88e',ink:'#563a12',bg:'#fff5d9',panel:'#f7e8bb',mark:'♛',kind:'royal'},
-west:{edge:'#8b542b',accent:'#d7ad70',ink:'#59351c',bg:'#f1dfbd',panel:'#e8cca0',mark:'★',kind:'west'},
-fantasy:{edge:'#a98be8',accent:'#e0d0ff',ink:'#f5edff',bg:'#241638',panel:'#382451',mark:'✧',kind:'fantasy'},
-world:{edge:'#187d83',accent:'#9ed9d4',ink:'#164c52',bg:'#e7f5ef',panel:'#cce9e1',mark:'◆',kind:'world'},
-neon:{edge:'#00e5ff',accent:'#ff4fd8',ink:'#eafcff',bg:'#101a32',panel:'#1c2c4d',mark:'✦',kind:'neon'},
-championship:{edge:'#244f91',accent:'#d5ad50',ink:'#183765',bg:'#f7f9ff',panel:'#e4ebf8',mark:'★',kind:'championship'}
-};
-function activeCardTheme(){const v=$('cardTheme')?.value||'auto';return v==='auto'?(NP===6?'world':'royal'):v}
-function setCardTheme(v){try{localStorage.setItem('marbles-card-theme',v)}catch(e){}render()}
-function cardSvg(c){
-const[r,s]=c.split('|'),name=activeCardTheme(),theme=CARD_THEMES[name]||CARD_THEMES.classic;
-const red=s==='♥'||s==='♦',suitInk=red?'#c62828':'#171b22';
-const F='font-family="Georgia,serif" font-weight="700"';
-let frame='';
-if(name==='royal')frame='<rect x="2.5" y="2.5" width="55" height="79" rx="5" fill="none" stroke="'+theme.edge+'" stroke-width="1.4"/><path d="M7 19Q7 7 19 7H41Q53 7 53 19M7 65Q7 77 19 77H41Q53 77 53 65" fill="none" stroke="'+theme.edge+'" stroke-width="1"/>';
-else if(name==='west')frame='<rect x="2.5" y="2.5" width="55" height="79" rx="3" fill="none" stroke="'+theme.edge+'" stroke-width="2"/><rect x="6" y="6" width="48" height="72" rx="2" fill="none" stroke="'+theme.accent+'" stroke-width="1" stroke-dasharray="2 2"/>';
-else if(name==='fantasy')frame='<rect x="2" y="2" width="56" height="80" rx="7" fill="none" stroke="'+theme.edge+'" stroke-width="1.6"/><path d="M5 18L10 7 15 12 30 5 45 12 50 7 55 18M5 66L10 77 15 72 30 79 45 72 50 77 55 66" fill="none" stroke="'+theme.accent+'" stroke-width="1"/>';
-else if(name==='world')frame='<rect x="2.5" y="2.5" width="55" height="79" rx="8" fill="none" stroke="'+theme.edge+'" stroke-width="1.7"/><path d="M6 25Q30 16 54 25M6 59Q30 68 54 59" fill="none" stroke="'+theme.accent+'" stroke-width="1"/>';
-else if(name==='neon')frame='<rect x="2" y="2" width="56" height="80" rx="5" fill="none" stroke="'+theme.edge+'" stroke-width="1.8"/><rect x="5" y="5" width="50" height="74" rx="3" fill="none" stroke="'+theme.accent+'" stroke-width=".8"/><path d="M8 17H17M43 17H52M8 67H17M43 67H52" stroke="'+theme.edge+'" stroke-width="2"/>';
-else if(name==='championship')frame='<rect x="2.5" y="2.5" width="55" height="79" rx="5" fill="none" stroke="'+theme.edge+'" stroke-width="1.8"/><path d="M5 18H55M5 66H55" stroke="'+theme.accent+'" stroke-width="3"/><path d="M8 21H52M8 63H52" stroke="'+theme.edge+'" stroke-width=".6"/>';
-else frame='<rect x="2.5" y="2.5" width="55" height="79" rx="5" fill="none" stroke="'+theme.edge+'" stroke-width="1"/>';
-let art='';
-if(name==='royal')art='<g opacity=".08" fill="'+theme.edge+'"><path d="M18 48L20 31 25 38 30 27 35 38 40 31 42 48Z"/><circle cx="20" cy="29" r="2"/><circle cx="30" cy="25" r="2"/><circle cx="40" cy="29" r="2"/></g>';
-if(name==='west')art='<g opacity=".08" fill="none" stroke="'+theme.edge+'" stroke-width="2"><path d="M30 25L34 35 45 35 36 42 40 53 30 46 20 53 24 42 15 35 26 35Z"/><circle cx="30" cy="40" r="17" stroke-dasharray="2 3"/></g>';
-if(name==='fantasy')art='<g opacity=".10" fill="'+theme.accent+'"><path d="M30 22L33 34 45 37 33 41 30 54 27 41 15 37 27 34Z"/><circle cx="13" cy="24" r="1.5"/><circle cx="47" cy="54" r="1.5"/><circle cx="44" cy="22" r="1"/><path d="M17 57Q30 68 43 57" fill="none" stroke="'+theme.accent+'" stroke-width="1"/></g>';
-if(name==='world')art='<g opacity=".08" fill="none" stroke="'+theme.edge+'" stroke-width="1"><circle cx="30" cy="41" r="17"/><circle cx="30" cy="41" r="9"/><path d="M30 20V62M9 41H51M15 26L45 56M45 26L15 56"/><path d="M30 23L34 38 30 35 26 38Z" fill="'+theme.edge+'"/></g>';
-if(name==='neon')art='<g opacity=".10" fill="none" stroke="'+theme.accent+'" stroke-width="1.5"><path d="M15 30H23V22H37V30H45V50H37V58H23V50H15Z"/><path d="M20 35H40M20 42H40M20 49H40" stroke="'+theme.edge+'"/><circle cx="30" cy="41" r="4" fill="'+theme.edge+'" stroke="none"/></g>';
-if(name==='championship')art='<g opacity=".08"><path d="M15 25H45L41 51 30 60 19 51Z" fill="'+theme.edge+'"/><path d="M19 31H41M20 36H40" stroke="'+theme.accent+'" stroke-width="2"/><path d="M24 47L30 41 36 47" fill="none" stroke="'+theme.accent+'" stroke-width="2"/></g>';
-const base='<rect x=".8" y=".8" width="58.4" height="82.4" rx="'+(name==='west'?'3':name==='world'?'8':'6')+'" fill="#fffdf8" stroke="'+theme.edge+'" stroke-width="1.5"/>'+frame+art;
-if(r==='JK'){
- const label=s==='r'?'RED JOKER':'BLACK JOKER';
- const center=name==='west'?'<path d="M30 23L35 35 48 35 38 43 42 56 30 48 18 56 22 43 12 35 25 35Z" fill="'+theme.accent+'" stroke="'+theme.edge+'"/>':
- name==='fantasy'?'<path d="M30 20L35 34 50 36 38 45 42 60 30 51 18 60 22 45 10 36 25 34Z" fill="'+theme.accent+'" stroke="'+theme.edge+'"/>':
- name==='neon'?'<path d="M17 27H43V53H17Z" fill="none" stroke="'+theme.edge+'" stroke-width="3"/><path d="M22 32L38 48M38 32L22 48" stroke="'+theme.accent+'" stroke-width="3"/>':
- '<circle cx="30" cy="41" r="16" fill="#f4f0e7" stroke="'+theme.edge+'" stroke-width="2"/><text x="30" y="48" text-anchor="middle" font-size="27" fill="'+theme.edge+'">'+theme.mark+'</text>';
- return '<svg viewBox="0 0 60 84">'+base+'<g '+F+' fill="'+suitInk+'"><text x="10" y="16" font-size="10">J</text><text x="50" y="16" text-anchor="end" font-size="10">J</text></g>'+center+'<text x="30" y="17" text-anchor="middle" font-size="9" fill="'+theme.edge+'">'+theme.mark+'</text><text x="30" y="70" text-anchor="middle" font-size="7.5" letter-spacing=".7" fill="'+theme.ink+'" '+F+'>JOKER</text></svg>';
-}
-const cor='<text x="9" y="16" font-size="'+(r==='10'?13:17)+'">'+r+'</text><text x="9" y="35" font-size="16">'+s+'</text>';
-let b='';
-if(r==='A')b='<text x="30" y="54" text-anchor="middle" font-size="42">'+s+'</text>';
-else if(PIPS[r])b=PIPS[r].map(([c,y])=>'<text x="'+PX[c]+'" y="'+(y+4.5)+'" text-anchor="middle" font-size="17"'+(y>42?' transform="rotate(180 '+PX[c]+' '+y+')"':'')+'>'+s+'</text>').join('');
-else{
- const crown=r==='J'?'M20 35Q24 22 42 28L40 35Z':'M19 35L19 25 25 30 30 23 35 30 41 25 41 35Z';
- b='<rect x="13" y="13" width="34" height="58" rx="'+(name==='west'?'1':'4')+'" fill="'+theme.panel+'" fill-opacity=".9" stroke="'+theme.edge+'" stroke-width="1"/><text x="30" y="21" text-anchor="middle" font-size="9" fill="'+theme.edge+'">'+theme.mark+'</text><path d="'+crown+'" fill="'+theme.edge+'" stroke="'+suitInk+'" stroke-width=".8"/><text x="30" y="55" text-anchor="middle" font-size="22">'+r+'</text><text x="30" y="67" text-anchor="middle" font-size="15">'+s+'</text>';
-}
-const corner=name==='west'?'<path d="M5 5l5 3-5 3M55 5l-5 3 5 3M5 73l5 3-5 3M55 73l-5 3 5 3" fill="none" stroke="'+theme.edge+'" stroke-width="1.2"/>':name==='neon'?'<path d="M5 13V5H13M47 5H55V13M5 71V79H13M47 79H55V71" fill="none" stroke="'+theme.accent+'" stroke-width="1.5"/>':name==='championship'?'<path d="M7 7H17M43 7H53M7 77H17M43 77H53" stroke="'+theme.edge+'" stroke-width="2"/>':'';
-return '<svg viewBox="0 0 60 84">'+base+corner+'<g fill="'+suitInk+'" '+F+' text-anchor="middle">'+cor+'<g transform="rotate(180 30 42)">'+cor+'</g>'+b+'</g></svg>';
-}
+function cardSvg(c){const[r,s]=c.split('|'),F='font-family="Georgia,serif" font-weight="700"',bg='<rect x=".8" y=".8" width="58.4" height="82.4" rx="6" fill="#fffdf6" stroke="#9a8f7a" stroke-width="1.2"/>';
+if(r=='JK'){const k=s=='r'?'#d1332e':'#1b1f2a';return `<svg viewBox="0 0 60 84">${bg}<path d="M14 54L18 22 26 38 30 18 34 38 42 22 46 54Z" fill="${k}"/><rect x="14" y="52" width="32" height="7" rx="2" fill="#e3b53a"/>${[[18,21],[30,17],[42,21]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#e3b53a"/>`).join('')}<text x="30" y="73" text-anchor="middle" ${F} font-size="8" letter-spacing="1" fill="${k}">JOKER</text><text x="8" y="14" text-anchor="middle" ${F} font-size="11" fill="${k}">J</text><text x="8" y="25" text-anchor="middle" font-size="10" fill="${k}">★</text></svg>`}
+const k=SU[s],cor=`<text x="8" y="14" font-size="${r=='10'?9:11}">${r}</text><text x="8" y="25" font-size="10">${s}</text>`;let b='';
+if(r=='A')b=`<text x="30" y="53" text-anchor="middle" font-size="34">${s}</text>`;
+else if(PIPS[r])b=PIPS[r].map(([c,y])=>`<text x="${PX[c]}" y="${y+4.5}" text-anchor="middle" font-size="13"${y>42?` transform="rotate(180 ${PX[c]} ${y})"`:''}>${s}</text>`).join('');
+else{const cr=r=='J'?'M20 35Q24 22 42 28L40 35Z':'M19 35L19 25 25 30 30 23 35 30 41 25 41 35Z';
+b=`<rect x="13" y="13" width="34" height="58" rx="3" fill="${k}" fill-opacity=".07" stroke="${k}" stroke-opacity=".5"/><path d="${cr}" fill="#e3b53a" stroke="${k}" stroke-width=".8"/>${r=='Q'?'<circle cx="30" cy="20" r="2.5" fill="#e3b53a" stroke="'+k+'" stroke-width=".8"/>':''}<text x="30" y="55" text-anchor="middle" font-size="22">${r}</text><text x="30" y="67" text-anchor="middle" font-size="11">${s}</text>`}
+return `<svg viewBox="0 0 60 84">${bg}<g fill="${k}" ${F} text-anchor="middle">${cor}<g transform="rotate(180 30 42)">${cor}</g>${b}</g></svg>`}
 function fill(p,n){while(hands[p].length<n){if(!deck.length){deck=shuf(disc);disc=[]}if(!deck.length)return;hands[p].push(deck.pop())}}
 function setSpeed(v){moveSpeed=['slow','normal','fast'].includes(v)?v:'normal';const scale=moveSpeed==='slow'?1.8:moveSpeed==='fast'?.45:1;document.documentElement?.style?.setProperty('--move-scale',scale);try{localStorage.setItem('marbles-speed',moveSpeed)}catch(e){}if(NP)render()}
 function speedDelay(){return moveSpeed==='slow'?.34:moveSpeed==='fast'?.055:.16}
@@ -249,7 +207,7 @@ s+=`<polyline points="${lane}" fill="none" stroke="${c}" stroke-opacity=".3" str
 for(const q of[tp(A(p)),tp(abs(p,E))])s+=`<circle cx="${q[0]}" cy="${q[1]}" r="${r1(.44*K)}" fill="none" stroke="${c}" stroke-width="1.8"/>`;
 for(let k=0;k<5;k++)s+=hole(pos(p,Y,k),.26)+hole(sf[k],.26)}
 return s}
-function render(){if($('cardTheme')){try{$('cardTheme').value=localStorage.getItem('marbles-card-theme')||'auto'}catch(e){$('cardTheme').value='auto'}}cur=over||setup||cover||!hu(turn)?[]:pend?second(pend):sel!=null?moves(turn,hands[turn][sel]):[];
+function render(){cur=over||setup||cover||!hu(turn)?[]:pend?second(pend):sel!=null?moves(turn,hands[turn][sel]):[];
 $('b').setAttribute('viewBox',NP==6?'-10 20 420 360':'30 30 340 340');
 let s=board();
 const movingTrack=!!(lastMove&&lastMove.from>=0&&lastMove.from<=E&&lastMove.to>=0&&lastMove.to<=E&&Math.abs(lastMove.to-lastMove.from)>1);
