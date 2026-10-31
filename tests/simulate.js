@@ -93,7 +93,8 @@ check(['auto','classic','royal','west','fantasy','world','neon','championship'].
   html.includes('<option value="' + v + '"')),
   'card theme selector exposes Auto and every supported theme');
 
-const themeSamples = [];\nfor (const [name, [edge, accent, kind]] of Object.entries(expectedThemes)) {
+const themeSamples = [];
+for (const [name, [edge, accent, kind]] of Object.entries(expectedThemes)) {
   els.cardTheme = Object.assign(mk(), { value: name });
   check(api.activeCardTheme() === name, name + ': manual theme selection is respected');
   const ace = api.cardSvg('A|♠');
