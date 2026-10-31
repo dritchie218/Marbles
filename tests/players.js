@@ -101,18 +101,21 @@ check(api.s.over && api.s.msg === 'Gold wins! 🎉', 'individual person win mess
 const mixes = [['4', true, [1, 1, 0, 0]], ['4', true, [1, 1, 1, 1]], ['6', true, [1, 0, 1, 1, 0, 0]], ['6', false, [1, 1, 1, 1, 1, 1]], ['4', false, [1, 0, 1, 0]]];
 let unfinished = 0, peeks = 0, games = 0; const unfinishedDetails = [];
 for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
-  rngSeed = 123456789;
+  // Use a distinct deterministic seed for every game so 60 runs exercise different card orders.
+  rngSeed = (123456789 + Math.imul(games + 1, 0x9e3779b1)) >>> 0;
   opts(np, tm); api.setWho([...w, 0, 0, 0, 0, 0, 0].slice(0, 6).map(Boolean)); api.init(); games++;
   const gameStarted = process.hrtime.bigint();
   console.log(`[SIM] Game ${games}/60 START — players=${np}, teams=${tm}, mix=${w.join('')}`);
   let n = 0, failure = null;
-  const seenStates = new Map();
-  const snapshot = z => ({
+  // Keep a bounded recent-state window: an unbounded Map can consume huge memory
+  // on long games. Exact game-state repeats inside this window indicate a loop.
+  const seenStates = new Set();
+  const stateOrder = [];
+  const MAX_REMEMBERED_STATES = 10000;
+  const signature = z => JSON.stringify({
     turn: z.turn, hands: z.hands, pegs: z.pegs, stuck: z.stuck,
-    forcedCard: z.forcedCard, pend: z.pend, cover: z.cover, over: z.over,
-    msg: z.msg, gid: z.gid
+    forcedCard: z.forcedCard, pend: z.pend, cover: z.cover, over: z.over
   });
-  const signature = z => JSON.stringify(snapshot(z));
   const details = reason => {
     const z = api.s;
     return {np,teams:tm,who:w,game:g,turn:z.turn,steps:n,reason,
@@ -122,9 +125,12 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   while (!api.s.over && n < 2000000) {
     s = api.s;
     const key = signature(s);
-    const visits = (seenStates.get(key) || 0) + 1;
-    seenStates.set(key, visits);
-    if (visits >= 3) { failure = 'repeated game state (seen 3 times)'; break; }
+    if (seenStates.has(key)) { failure = 'repeated game state (loop detected)'; break; }
+    seenStates.add(key);
+    stateOrder.push(key);
+    if (stateOrder.length > MAX_REMEMBERED_STATES) {
+      seenStates.delete(stateOrder.shift());
+    }
     n++;
     if (!api.hu(s.turn)) {
       api.ai();
