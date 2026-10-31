@@ -266,7 +266,7 @@ if(!selPeg){[...new Set(cur.map(a=>a.o*9+a.k))].forEach(id=>{const o=id/9|0,k=id
 cur.forEach(a=>{const[x,y]=pos(a.o,a.to,a.k);s+=`<circle cx="${x}" cy="${y}" r="${r1(MR*.9)}" fill="none" stroke="${cq(a)}" stroke-width="1.6" stroke-dasharray="2 2" pointer-events="none"/>`})}
 else cur.forEach((a,i)=>{if(a.o==selPeg[0]&&a.k==selPeg[1]){const[x,y]=pos(a.o,a.to,a.k);s+=ring(x,y,MR*1.5,'rgba(255,255,255,.4)',`go(${i})`,cq(a))}});
 $('b').innerHTML=s;
-if($('winner')){$('winner').hidden=!over;if(over){$('winnerTitle').textContent=winnerTitle;$('winnerNames').textContent=winnerNames}}
+if($('winner')){const banner=$('winner');banner.hidden=!over;if(banner.style)banner.style.display=over?'flex':'none';if(over){$('winnerTitle').textContent=winnerTitle;$('winnerNames').textContent=winnerNames}}
 if($('speed'))$('speed').value=moveSpeed;
 if($('mv')){$('mv').textContent=moveNotice;$('mv').classList?.toggle('show',!!moveNotice)}
 $('tl').innerHTML=teams?(HN>1?['Team 1','Team 2']:['Your team','Opponents']).map((t,i)=>t+':'+side(i).map(q=>`<i style="background:${COL[q]}"></i>${NAME[q]}`).join('')).join(' &nbsp;·&nbsp; ')+(!over&&ctl(vw)!=vw?` &nbsp;·&nbsp; <b>${HN>1?NAME[vw]+' is playing':'Playing'} for ${NAME[ctl(vw)]}</b>`:''):'';

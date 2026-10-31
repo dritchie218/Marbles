@@ -7,7 +7,7 @@ Math.random = () => { rngSeed = (Math.imul(rngSeed, 1664525) + 1013904223) >>> 0
 const js = html.match(/<script>([\s\S]*)<\/script>/)[1].replace(/\ninit\(\);\s*$/, '\n');
 
 const els = {};
-const mk = () => ({ value: '4', checked: true, innerHTML: '', textContent: '', setAttribute() {} });
+const mk = () => ({ value: '4', checked: true, innerHTML: '', textContent: '', style: {}, hidden: true, setAttribute() {} });
 global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 
@@ -77,7 +77,7 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   check(api.s.over, `${np} players (${color}, ${theme}): game finished`);
   api.render();
 }
-const completedGameSnapshot = { winner: api.winner, hidden: els.winner.hidden, title: els.winnerTitle.textContent, names: els.winnerNames.textContent };
+const completedGameSnapshot = { winner: api.winner, hidden: els.winner.hidden, display: els.winner.style.display, title: els.winnerTitle.textContent, names: els.winnerNames.textContent };
 
 // --- themed playing-card rendering ---
 // Exercise the actual renderer, not just the presence of theme names in the HTML.
@@ -151,3 +151,5 @@ check(completedGameSnapshot.winner.title && completedGameSnapshot.winner.names &
 check(completedGameSnapshot.hidden === false && completedGameSnapshot.title === completedGameSnapshot.winner.title &&
   completedGameSnapshot.names === completedGameSnapshot.winner.names,
   'completed game renders the winner announcement over the board');
+check(completedGameSnapshot.display === 'flex',
+  'completed game explicitly displays the winner overlay instead of relying only on the hidden attribute');
