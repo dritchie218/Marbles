@@ -12,7 +12,7 @@ global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 
 const api = new Function(js + `
-return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,cardSvg,activeCardTheme,CARD_THEMES,
+return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,cardSvg,
   get speed(){return moveSpeed},
   get winner(){return {title:winnerTitle,names:winnerNames,players:winnerPlayers.slice()}},
   get s(){return {NP,T,E,CI,over,turn,pend,hands,pegs,SD,N,stuck,forcedCard}}}`)();
@@ -79,62 +79,24 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
 }
 const completedGameSnapshot = { winner: api.winner, hidden: els.winner.hidden, display: els.winner.style.display, title: els.winnerTitle.textContent, names: els.winnerNames.textContent };
 
-// --- themed playing-card rendering ---
-// Exercise the actual renderer, not just the presence of theme names in the HTML.
-const expectedThemes = {
- classic:['#8b8172','#d4cbbb','✦'],royal:['#b58a2b','#f0d88e','♛'],
- west:['#8b542b','#d7ad70','★'],fantasy:['#a98be8','#e0d0ff','✧'],
- world:['#187d83','#9ed9d4','◆'],neon:['#00e5ff','#ff4fd8','✦'],
- championship:['#244f91','#d5ad50','★']
-};
-check(Object.keys(api.CARD_THEMES).sort().join(',') === Object.keys(expectedThemes).sort().join(','),
-  'all seven selectable card themes have renderer palettes');
-check(['auto','classic','royal','west','fantasy','world','neon','championship'].every(v =>
-  html.includes('<option value="' + v + '"')),
-  'card theme selector exposes Auto and every supported theme');
-
-const themeSamples = [];
-for (const [name, [edge, accent, mark]] of Object.entries(expectedThemes)) {
-  els.cardTheme = Object.assign(mk(), { value: name });
-  check(api.activeCardTheme() === name, name + ': manual theme selection is respected');
-  const ace = api.cardSvg('A|♠');
-  const ten = api.cardSvg('10|♥');
-  const queen = api.cardSvg('Q|♦');
-  const joker = api.cardSvg('JK|b');
-  themeSamples.push(ace);
-  check(ace.includes('viewBox="0 0 60 84"') && ace.includes('stroke="' + edge + '"') &&
-    ace.includes('fill="#fffdf8"') && ace.includes('>A</text>') && ace.includes('>♠</text>'),
-    name + ': ace retains readable rank and black suit inside the card frame');
-  check(ten.includes('>10</text>') && ten.includes('>♥</text>') &&
-    ten.includes('fill="' + '#c62828' + '"') && ten.includes('font-size="17"'),
-    name + ': ten of hearts retains red suit and pip layout');
-  check(queen.includes('>Q</text>') && queen.includes('>♦</text>') &&
-    queen.includes(mark) && queen.includes('fill="' + api.CARD_THEMES[name].panel + '"'),
-    name + ': face card keeps rank, suit and theme artwork');
-  check(joker.includes('JOKER') && joker.includes(mark) && joker.includes('viewBox="0 0 60 84"'),
-    name + ': Joker renders with theme decoration inside the card frame');
-  check(ace.includes('stroke="' + accent + '"') || ace.includes('stroke="' + edge + '"'), name + ': distinctive frame treatment is present');
-}
-
-
-check(new Set(themeSamples).size === 7, 'all seven card themes render visibly different artwork and backgrounds');
-check(api.cardSvg('10|♥').includes('font-size="13"') && api.cardSvg('A|♠').includes('font-size="42"'), 'ten and ace corner/center symbols are enlarged for phone readability');
-check(html.includes('flex:0 0 58px') && html.includes('overflow-x:auto'), 'hand cards keep a readable minimum width and scroll horizontally on narrow screens');
-// Auto mode must follow board size, while explicit choices override it.
-els.np = Object.assign(mk(), { value: '4' });
-els.cl = Object.assign(mk(), { value: 'Green' });
-els.th = Object.assign(mk(), { value: 'mid' });
-els.cardTheme = Object.assign(mk(), { value: 'auto' });
-api.init();
-check(api.activeCardTheme() === 'royal', 'Auto selects Royal Casino on a four-player board');
-check(api.cardSvg('K|♣').includes('stroke="#b58a2b"'), 'four-player auto theme is applied to rendered cards');
-els.np.value = '6';
-api.init();
-check(api.activeCardTheme() === 'world', 'Auto selects World Tour on a six-player board');
-check(api.cardSvg('K|♣').includes('stroke="#187d83"'), 'six-player auto theme is applied to rendered cards');
-els.cardTheme.value = 'fantasy';
-check(api.activeCardTheme() === 'fantasy' && api.cardSvg('K|♣').includes('stroke="#a98be8"'),
-  'manual theme overrides the automatic board theme');
+// --- single standard playing-card design ---
+// The deck uses one consistent face design for every board and player count.
+check(!html.includes('cardTheme') && !html.includes('CARD_THEMES') && !html.includes('marbles-card-theme'),
+  'there is no card-theme selector, theme state, or theme persistence');
+const aceCard = api.cardSvg('A|♠');
+const tenCard = api.cardSvg('10|♥');
+const queenCard = api.cardSvg('Q|♦');
+const jokerCard = api.cardSvg('JK|b');
+check(aceCard.includes('viewBox="0 0 60 84"') && aceCard.includes('>A</text>') && aceCard.includes('>♠</text>'),
+  'standard ace keeps its readable rank and suit');
+check(tenCard.includes('>10</text>') && tenCard.includes('>♥</text>') && tenCard.includes('font-size="13"'),
+  'standard ten keeps its rank, red suit, and pip layout');
+check(queenCard.includes('>Q</text>') && queenCard.includes('>♦</text>'),
+  'standard face card keeps its rank and suit');
+check(jokerCard.includes('JOKER') && jokerCard.includes('viewBox="0 0 60 84"'),
+  'standard Joker keeps its identifying label and card frame');
+check(html.includes('flex:0 0 clamp(54px') && html.includes('overflow-x:auto'),
+  'hand cards remain readable and horizontally scroll on narrow screens');
 
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
 console.log('All checks passed');
