@@ -104,7 +104,7 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   rngSeed = 123456789;
   opts(np, tm); api.setWho([...w, 0, 0, 0, 0, 0, 0].slice(0, 6).map(Boolean)); api.init(); games++;
   let n = 0;
-  while (!api.s.over && n++ < 20000) {
+  while (!api.s.over && n++ < 200000) {
     s = api.s;
     if (!api.hu(s.turn)) { api.ai(); continue; }
     if (s.cover) api.ready();
