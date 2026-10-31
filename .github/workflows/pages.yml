@@ -17,6 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -25,6 +26,7 @@ jobs:
         with:
           node-version: 22
       - name: Run game simulation tests
+        timeout-minutes: 25
         run: npm test
       - name: Generate app icons
         run: npm run icons
