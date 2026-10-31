@@ -112,10 +112,13 @@ for (const [name, [edge, accent, kind]] of Object.entries(expectedThemes)) {
     queen.includes(mark) && queen.includes('fill="' + api.CARD_THEMES[name].panel + '"'),
     name + ': face card keeps rank, suit and theme artwork');
   check(joker.includes('JOKER') && joker.includes(mark) && joker.includes('viewBox="0 0 60 84"'),
-    name + ': Joker renders with theme decoration inside the card frame');\n  check(ace.includes('stroke="' + accent + '"') || ace.includes('stroke="' + edge + '"'), name + ': distinctive frame treatment is present');
+    name + ': Joker renders with theme decoration inside the card frame');
+  check(ace.includes('stroke="' + accent + '"') || ace.includes('stroke="' + edge + '"'), name + ': distinctive frame treatment is present');
 }
 
-\ncheck(new Set(themeSamples).size === 7, 'all seven card themes render visibly different artwork and backgrounds');\n// Auto mode must follow board size, while explicit choices override it.
+
+check(new Set(themeSamples).size === 7, 'all seven card themes render visibly different artwork and backgrounds');
+// Auto mode must follow board size, while explicit choices override it.
 els.np = Object.assign(mk(), { value: '4' });
 els.cl = Object.assign(mk(), { value: 'Green' });
 els.th = Object.assign(mk(), { value: 'mid' });
