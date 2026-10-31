@@ -219,7 +219,7 @@ const tr=[0,1,2,3,4].filter(k=>tk(P[k]));
 if(c=='JK'){if(P.some(tk))[ow].forEach(o=>pegs[o].forEach((v,k)=>{if(tk(v))pegs.forEach((Q,q)=>{if(q!=o)Q.forEach(u=>{if(tk(u)){const t0=(abs(q,u)-A(o)+T)%T,t=t0>E?t0-T:t0;if(mate(o,q)&&(u===E||Q.some(w=>w===E)))return;if(!pegs[o].some(w=>tk(w)&&hid(o,w)==hid(o,t)))add(o,k,t)}})})}))}
 else if(c=='8')tr.forEach(k=>add(ow,k,bwd(ow,k,8)));
 else if(c=='7'||c=='9'){const sp=(o,k,t,r)=>{if(t==null)return;const v=pegs[o][k];try{pegs[o][k]=t;if(second({rem:r,ex:[o,k]}).length)m.push({o,k,to:t,rem:r})}finally{pegs[o][k]=v}};
-if(c=='7'){const w=side(ow);const owners=w.filter(o=>pegs[o].some(tk));if(owners.some(o=>o===ow)){owners.forEach(o=>{pegs[o].forEach((v,k)=>{if(!tk(v))return;add(o,k,fwd(o,k,7));for(let a=1;a<7;a++){const remainingOwners=owners.filter(q=>q!==o);sp(o,k,fwd(o,k,a),{t:'f',n:7-a,ow:remainingOwners})}})})}}
+if(c=='7'){const w=side(ow),active=v=>v>=0&&v<=T,ownOut=P.some(active);if(ownOut){[0,1,2,3,4].forEach(k=>{if(active(P[k])){add(ow,k,fwd(ow,k,7));for(let a=1;a<7;a++)sp(ow,k,fwd(ow,k,a),{t:'f',n:7-a,ow:w})}});w.filter(o=>o!=ow).forEach(o=>{pegs[o].forEach((v,k)=>{if(active(v)){for(let a=1;a<7;a++)sp(o,k,fwd(o,k,a),{t:'f',n:7-a,ow:[ow]})}})})}}
 else[0,1,2,3,4].forEach(k=>{for(let a=1;a<9;a++){sp(ow,k,fwd(ow,k,a),{t:'b',n:9-a,ow:[ow]});sp(ow,k,bwd(ow,k,a),{t:'f',n:9-a,ow:[ow]})}})}
 else{const n={A:1,K:13,Q:12,J:11}[c]||+c;P.forEach((v,k)=>add(ow,k,fwd(ow,k,n)))}return m}
 function step(o,k,to){const v=pegs[o][k],m=o==ctl(turn)?'a marble':(NAME[o]=='You'?'your marble':NAME[o]+'’s marble');let d=to-v;if(d>T/2)d-=T;
