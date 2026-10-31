@@ -12,7 +12,7 @@ global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 
 const api = new Function(js + `
-return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,
+return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,cardSvg,activeCardTheme,CARD_THEMES,
   get speed(){return moveSpeed},
   get s(){return {NP,T,E,CI,over,turn,pend,hands,pegs,SD,N,stuck,forcedCard}}}`)();
 
@@ -76,5 +76,58 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   check(api.s.over, `${np} players (${color}, ${theme}): game finished`);
   api.render();
 }
+// --- themed playing-card rendering ---
+// Exercise the actual renderer, not just the presence of theme names in the HTML.
+const expectedThemes = {
+  classic: ['#9a8f7a', '#c8bda8', '✦'],
+  royal: ['#b38a32', '#ead9a5', '♛'],
+  west: ['#a16a35', '#e7c99b', '★'],
+  fantasy: ['#7650a8', '#cbb7ed', '✧'],
+  world: ['#287d86', '#b7dfe0', '◆'],
+  neon: ['#00a9c7', '#d4f8ff', '✦'],
+  championship: ['#315b9b', '#c9a85c', '★']
+};
+check(Object.keys(api.CARD_THEMES).sort().join(',') === Object.keys(expectedThemes).sort().join(','),
+  'all seven selectable card themes have renderer palettes');
+check(['auto','classic','royal','west','fantasy','world','neon','championship'].every(v =>
+  html.includes('<option value="' + v + '"')),
+  'card theme selector exposes Auto and every supported theme');
+
+for (const [name, [edge, accent, mark]] of Object.entries(expectedThemes)) {
+  els.cardTheme = Object.assign(mk(), { value: name });
+  check(api.activeCardTheme() === name, name + ': manual theme selection is respected');
+  const ace = api.cardSvg('A|♠');
+  const ten = api.cardSvg('10|♥');
+  const queen = api.cardSvg('Q|♦');
+  const joker = api.cardSvg('JK|b');
+  check(ace.includes('viewBox="0 0 60 84"') && ace.includes('stroke="' + edge + '"') &&
+    ace.includes('stroke="' + accent + '"') && ace.includes('>A</text>') && ace.includes('>♠</text>'),
+    name + ': ace retains readable rank and black suit inside the card frame');
+  check(ten.includes('>10</text>') && ten.includes('>♥</text>') &&
+    ten.includes('#d1332e') && ten.includes('font-size="13"'),
+    name + ': ten of hearts retains red suit and pip layout');
+  check(queen.includes('>Q</text>') && queen.includes('>♦</text>') &&
+    queen.includes(mark) && queen.includes('fill="' + accent + '"'),
+    name + ': face card keeps rank, suit and theme artwork');
+  check(joker.includes('JOKER') && joker.includes(mark) && joker.includes('viewBox="0 0 60 84"'),
+    name + ': Joker renders with theme decoration inside the card frame');
+}
+
+// Auto mode must follow board size, while explicit choices override it.
+els.np = Object.assign(mk(), { value: '4' });
+els.cl = Object.assign(mk(), { value: 'Green' });
+els.th = Object.assign(mk(), { value: 'mid' });
+els.cardTheme = Object.assign(mk(), { value: 'auto' });
+api.init();
+check(api.activeCardTheme() === 'royal', 'Auto selects Royal Casino on a four-player board');
+check(api.cardSvg('K|♣').includes('#b38a32'), 'four-player auto theme is applied to rendered cards');
+els.np.value = '6';
+api.init();
+check(api.activeCardTheme() === 'world', 'Auto selects World Tour on a six-player board');
+check(api.cardSvg('K|♣').includes('#287d86'), 'six-player auto theme is applied to rendered cards');
+els.cardTheme.value = 'fantasy';
+check(api.activeCardTheme() === 'fantasy' && api.cardSvg('K|♣').includes('#7650a8'),
+  'manual theme overrides the automatic board theme');
+
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
 console.log('All checks passed');
