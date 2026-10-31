@@ -77,6 +77,8 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   check(api.s.over, `${np} players (${color}, ${theme}): game finished`);
   api.render();
 }
+const completedGameSnapshot = { winner: api.winner, hidden: els.winner.hidden, title: els.winnerTitle.textContent, names: els.winnerNames.textContent };
+
 // --- themed playing-card rendering ---
 // Exercise the actual renderer, not just the presence of theme names in the HTML.
 const expectedThemes = {
@@ -142,8 +144,8 @@ check(html.includes('id="winnerTitle"') && html.includes('id="winnerNames"') &&
   'winner overlay identifies the winner and offers a new-game action');
 check(html.includes("if(over){$('winnerTitle').textContent=winnerTitle;$('winnerNames').textContent=winnerNames}"),
   'winner overlay content is populated when the game ends');
-check(api.s.over && api.winner.title && api.winner.names && api.winner.players.length > 0,
+check(completedGameSnapshot.winner.title && completedGameSnapshot.winner.names && completedGameSnapshot.winner.players.length > 0,
   'completed simulated game records a visible winner and winning player names');
-check(els.winner.hidden === false && els.winnerTitle.textContent === api.winner.title &&
-  els.winnerNames.textContent === api.winner.names,
+check(completedGameSnapshot.hidden === false && completedGameSnapshot.title === completedGameSnapshot.winner.title &&
+  completedGameSnapshot.names === completedGameSnapshot.winner.names,
   'completed game renders the winner announcement over the board');
