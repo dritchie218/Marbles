@@ -174,7 +174,7 @@ function act(p,ci,a){if(stuck[p]>=3&&ci!==forcedCard[p])return;curR=rk(hands[p][
 if(!hu(p)){const b=second(pd).sort((x,y)=>val(y)-val(x))[0];step(b.o,b.k,b.to);fin(p,ci)}else{pend=pd;selPeg=null;render()}}
 function fin(p,ci){const c=hands[p].splice(ci,1)[0];disc.push(c);msg=NAME[p]+' played '+cname(c)+'. '+dsc+cap;addLog(p,msg);dsc='';cap='';pend=null;sel=selPeg=null;
 let w=-1;for(let o=0;o<NP;o++)if(teams?o<2&&side(o).every(done):done(o)){w=o;break}
-if(w>=0){over=true;winnerPlayers=teams?side(w):[w];winnerNames=winnerPlayers.map(q=>NAME[q]).join(" + ");winnerTitle=teams?(winnerPlayers.some(hu)?"YOUR TEAM WINS!":"TEAM WINS!"):(hu(w)?"YOU WIN!":NAME[w]+" WINS!");msg=teams?(NAME[w]=='You'?'Your team wins! 🎉':winnerNames+' win'+(winnerPlayers.some(hu)?'! 🎉':'.')):(NAME[w]=='You'?'You win! 🎉':NAME[w]+' wins'+(hu(w)?'! 🎉':'.'));return render()}
+if(w>=0){over=true;winnerPlayers=teams?side(w):[w];winnerNames=winnerPlayers.map(q=>NAME[q]).join(" + ");winnerTitle=teams?(winnerPlayers.some(hu)?"YOUR TEAM WINS!":"TEAM WINS!"):(hu(w)?"YOU WIN!":NAME[w]+" WINS!");const nm=winnerPlayers.map(q=>NAME[q]).join(", ").replace(/, ([^,]*)$/," and $1");msg=teams?(NAME[w]=='You'?'Your team wins! 🎉':nm+' win'+(winnerPlayers.some(hu)?'! 🎉':'.')):(NAME[w]=='You'?'You win! 🎉':NAME[w]+' wins'+(hu(w)?'! 🎉':'.'));return render()}
 turn=(p+1)%NP;begin()}
 function forced(p,ci){const P=pegs[ctl(p)];if(!P.some(tk)&&P.includes(Y))stuck[p]++;disc.push(hands[p].splice(ci,1)[0]);msg=NAME[p]+' had no move and discarded.';addLog(p,msg);sel=selPeg=null;turn=(p+1)%NP;begin()}
 function ai(){if(over||hu(turn))return;const p=turn;let b=null;hands[p].forEach((c,ci)=>{if(stuck[p]>=3&&ci!==forcedCard[p])return;moves(p,c).forEach(a=>{const s=val(a);if(!b||s>b.s)b={s,ci,a}})});
