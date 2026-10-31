@@ -100,7 +100,8 @@ for (const [name, [edge, accent, kind]] of Object.entries(expectedThemes)) {
   const ace = api.cardSvg('A|♠');
   const ten = api.cardSvg('10|♥');
   const queen = api.cardSvg('Q|♦');
-  const joker = api.cardSvg('JK|b');\n  themeSamples.push(ace);
+  const joker = api.cardSvg('JK|b');
+  themeSamples.push(ace);
   check(ace.includes('viewBox="0 0 60 84"') && ace.includes('stroke="' + edge + '"') &&
     ace.includes('stroke="' + accent + '"') && ace.includes('>A</text>') && ace.includes('>♠</text>'),
     name + ': ace retains readable rank and black suit inside the card frame');
