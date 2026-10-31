@@ -29,7 +29,7 @@ const start = (np, teams = true) => {
 
 // --- deck creation, randomization, and in-game recycle ---
 rngSeed = 0x12345678;
-s = start(4, false);
+const deckState = start(4, false);
 const initialCards = api.cards;
 const allInitialCards = [...initialCards.deck, ...initialCards.disc, ...initialCards.hands.flat()];
 const expectedPack = [];
