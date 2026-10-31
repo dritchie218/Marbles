@@ -12,7 +12,7 @@ global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 const timers = [];
 global.setTimeout = f => { timers.push(f); return timers.length; };
 const api = new Function(js + `
-return {init,newGame,seat,start,ready,pick,act,ai,fin,step,second,forced,moves,render,hu,
+return {init,newGame,seat,start,ready,pick,act,ai,playBest(){const p=turn,was=who[p];who[p]=false;try{ai()}finally{who[p]=was}},fin,step,second,forced,moves,render,hu,
   setWho(w){who=w.slice()}, setHand(p,h){hands[p]=h.slice()}, setPegs(o,v){pegs[o]=v.slice()}, setStuck(p,n){stuck[p]=n},
   get s(){return {NP,E,T,turn,vw,cover,setup,HN,NAME,who,hands,pegs,over,msg,pend,gid,log,stuck,forcedCard}}}`)();
 
@@ -162,6 +162,20 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
     }
     if (s.cover) api.ready();
     s = api.s;
+    if (api.hu(s.turn)) {
+      // Simulate a competent person making a legal strategic choice. The separate
+      // pass-and-play tests above still verify real person privacy and controls.
+      const before = JSON.stringify(api.s.pegs);
+      const handBefore = api.s.hands[s.turn].length;
+      api.playBest();
+      if (JSON.stringify(api.s.pegs) !== before) activity.cardPlays++;
+      else if (api.s.hands[s.turn].length < handBefore) activity.discards++;
+      boardMetrics();
+      if (n % 100000 === 0) console.log(`[SIM] Game ${games}/60 heartbeat — steps=${n}; moves=${activity.marbleMoves}; discards=${activity.discards}; homeEntries=${activity.homeEntries}; noBoardChange=${n-activity.lastBoardChange}; noHomeEntry=${n-activity.lastHomeEntry}`);
+      if (n-activity.lastBoardChange >= STALL_WINDOW) { failure = `stall detected: no board movement for ${STALL_WINDOW} steps`; break; }
+      if (api.s.over) break;
+      continue;
+    }
     if (s.vw !== s.turn) peeks++;
     const h = s.hands[s.turn], i = h.findIndex((c, ci) => (s.forcedCard[s.turn] == null || ci === s.forcedCard[s.turn]) && api.moves(s.turn, c).length);
     if (i < 0) {
