@@ -95,7 +95,7 @@ check(queenCard.includes('>Q</text>') && queenCard.includes('>♦</text>'),
   'standard face card keeps its rank and suit');
 check(jokerCard.includes('JOKER') && jokerCard.includes('viewBox="0 0 60 84"'),
   'standard Joker keeps its identifying label and card frame');
-check(html.includes('flex:0 0 clamp(54px') && html.includes('overflow-x:auto'),
+check(html.includes('flex:0 0 clamp(64px') && html.includes('overflow-x:auto'),
   'hand cards remain readable and horizontally scroll on narrow screens');
 
 
