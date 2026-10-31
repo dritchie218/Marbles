@@ -47,7 +47,7 @@ check(initialCards.hands.reduce((n, h) => n + h.length, 0) === 21 &&
   initialCards.deck.length === 141 && initialCards.disc.length === 0,
   'new game: deals five cards to each player and one extra to the starting player');
 const canonicalPack = expectedPack.join(',');
-check(initialCards.deck.join(',') !== canonicalPack,
+check(initialCards.deck.join(',') !== expectedPack.slice(0, initialCards.deck.length).join(','),
   'new game: draw pile is shuffled rather than left in pack order');
 api.setDisc(['2|♠', '4|♥', '6|♦', '8|♣']);
 api.setDeck([]);
@@ -58,8 +58,7 @@ const recycled = api.cards;
 check(recycled.disc.length === 0 && recycled.deck.length === 3 &&
   recycled.hands[0].length === handSizeBeforeRecycle + 1,
   'mid-game exhaustion: discard pile is recycled, one card drawn, and discard cleared');
-check(recycled.deck.join(',') !== '2|♠,4|♥,6|♦,8|♣' &&
-  [...recycled.deck, recycled.hands[0].at(-1)].length === 4,
+check([...recycled.deck, recycled.hands[0].at(-1)].join(',') !== '2|♠,4|♥,6|♦,8|♣',
   'mid-game exhaustion: recycled discard cards are shuffled before drawing');
 const firstShuffle = initialCards.deck.join(',');
 rngSeed = 0x0badcafe;
