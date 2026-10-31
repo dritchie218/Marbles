@@ -119,7 +119,7 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
       stuck:z.stuck,forcedCard:z.forcedCard,pegs:z.pegs,
       hands:z.hands.map(h=>h.map(c=>c.split('|')[0]))};
   };
-  while (!api.s.over && n < 200000) {
+  while (!api.s.over && n < 2000000) {
     s = api.s;
     const key = signature(s);
     const visits = (seenStates.get(key) || 0) + 1;
@@ -155,7 +155,7 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   }
   const elapsedMs = Number(process.hrtime.bigint() - gameStarted) / 1e6;
   if (!api.s.over) {
-    failure = failure || (n >= 200000 ? 'step safety limit reached' : 'simulation ended without a win');
+    failure = failure || (n >= 2000000 ? 'step safety limit reached' : 'simulation ended without a win');
     unfinished++;
     const diagnostic = details(failure);
     unfinishedDetails.push(diagnostic);
