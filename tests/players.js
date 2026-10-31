@@ -111,13 +111,19 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   const activity = {turns: Array(Number(np)).fill(0), discards: 0, cardPlays: 0,
     marbleMoves: 0, homeEntries: 0, lastBoardChange: 0, lastHomeEntry: 0};
   let lastBoard = JSON.stringify(api.s.pegs);
-  let lastHomeCount = api.s.pegs.flat().filter(v => v > api.s.E).length;
+  let lastSafeLaneCount = api.s.pegs.flat().filter(v => v > api.s.E).length;
   const boardMetrics = () => {
     const z = api.s, board = JSON.stringify(z.pegs);
-    const homes = z.pegs.flat().filter(v => v > z.E).length;
+    const safeLaneCount = z.pegs.flat().filter(v => v > z.E).length;
     if (board !== lastBoard) { activity.marbleMoves++; activity.lastBoardChange = n; lastBoard = board; }
-    if (homes > lastHomeCount) { activity.homeEntries += homes - lastHomeCount; activity.lastHomeEntry = n; }
-    lastHomeCount = homes;
+    if (safeLaneCount < lastSafeLaneCount) {
+      failure = failure || `safe-lane regression: completed marbles decreased from ${lastSafeLaneCount} to ${safeLaneCount}`;
+    }
+    if (safeLaneCount > lastSafeLaneCount) {
+      activity.homeEntries += safeLaneCount - lastSafeLaneCount;
+      activity.lastHomeEntry = n;
+    }
+    lastSafeLaneCount = safeLaneCount;
   };
   const STALL_WINDOW = 100000;
   // Keep a bounded recent-state window: an unbounded Map can consume huge memory
@@ -154,7 +160,7 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
       api.ai();
       if (JSON.stringify(api.s.pegs) !== before) activity.cardPlays++;
       else if (api.s.hands[s.turn].length < handBefore) activity.discards++;
-      boardMetrics();
+      boardMetrics(); if (failure) break;
       if (n % 100000 === 0) console.log(`[SIM] Game ${games}/60 heartbeat — steps=${n}; moves=${activity.marbleMoves}; discards=${activity.discards}; homeEntries=${activity.homeEntries}; noBoardChange=${n-activity.lastBoardChange}; noHomeEntry=${n-activity.lastHomeEntry}`);
       if (n-activity.lastBoardChange >= STALL_WINDOW) { failure = `stall detected: no board movement for ${STALL_WINDOW} steps`; break; }
       if (api.s.over) break;
@@ -170,7 +176,7 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
       api.playBest();
       if (JSON.stringify(api.s.pegs) !== before) activity.cardPlays++;
       else if (api.s.hands[s.turn].length < handBefore) activity.discards++;
-      boardMetrics();
+      boardMetrics(); if (failure) break;
       if (n % 100000 === 0) console.log(`[SIM] Game ${games}/60 heartbeat — steps=${n}; moves=${activity.marbleMoves}; discards=${activity.discards}; homeEntries=${activity.homeEntries}; noBoardChange=${n-activity.lastBoardChange}; noHomeEntry=${n-activity.lastHomeEntry}`);
       if (n-activity.lastBoardChange >= STALL_WINDOW) { failure = `stall detected: no board movement for ${STALL_WINDOW} steps`; break; }
       if (api.s.over) break;
@@ -183,7 +189,7 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
       const before = api.s.hands[s.turn].length;
       api.forced(s.turn, Math.random() * h.length | 0);
       if (api.s.hands[s.turn].length < before) activity.discards++;
-      boardMetrics();
+      boardMetrics(); if (failure) break;
       if (n % 100000 === 0) console.log(`[SIM] Game ${games}/60 heartbeat — steps=${n}; moves=${activity.marbleMoves}; discards=${activity.discards}; homeEntries=${activity.homeEntries}; noBoardChange=${n-activity.lastBoardChange}; noHomeEntry=${n-activity.lastHomeEntry}`);
       if (n-activity.lastBoardChange >= STALL_WINDOW) { failure = `stall detected: no board movement for ${STALL_WINDOW} steps`; break; }
       if (api.s.over) break;
@@ -193,7 +199,7 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
     const before = JSON.stringify(api.s.pegs);
     api.act(s.turn, i, ms[Math.random() * ms.length | 0]);
     activity.cardPlays++;
-    boardMetrics();
+    boardMetrics(); if (failure) break;
     if (n % 100000 === 0) console.log(`[SIM] Game ${games}/60 heartbeat — steps=${n}; moves=${activity.marbleMoves}; discards=${activity.discards}; homeEntries=${activity.homeEntries}; noBoardChange=${n-activity.lastBoardChange}; noHomeEntry=${n-activity.lastHomeEntry}`);
     if (n-activity.lastBoardChange >= STALL_WINDOW) { failure = `stall detected: no board movement for ${STALL_WINDOW} steps`; break; }
     if (api.s.over) break;
@@ -201,7 +207,7 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
     if (p) {
       const l = api.second(p), b = l[Math.random() * l.length | 0];
       api.step(b.o, b.k, b.to);
-      boardMetrics();
+      boardMetrics(); if (failure) break;
       if (api.s.over) break;
       api.fin(api.s.turn, p.ci);
       if (api.s.over) break;
