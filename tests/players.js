@@ -14,7 +14,7 @@ global.setTimeout = f => { timers.push(f); return timers.length; };
 const api = new Function(js + `
 return {init,newGame,seat,start,ready,pick,act,ai,fin,step,second,forced,moves,render,hu,
   setWho(w){who=w.slice()}, setHand(p,h){hands[p]=h.slice()}, setPegs(o,v){pegs[o]=v.slice()},
-  get s(){return {NP,E,turn,vw,cover,setup,HN,NAME,who,hands,over,msg,pend,gid,log,stuck,forcedCard}}}`)();
+  get s(){return {NP,E,T,turn,vw,cover,setup,HN,NAME,who,hands,pegs,over,msg,pend,gid,log,stuck,forcedCard}}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
