@@ -82,10 +82,10 @@ const completedGameSnapshot = { winner: api.winner, hidden: els.winner.hidden, t
 // --- themed playing-card rendering ---
 // Exercise the actual renderer, not just the presence of theme names in the HTML.
 const expectedThemes = {
- classic:['#8b8172','#d4cbbb','classic'],royal:['#b58a2b','#f0d88e','royal'],
- west:['#8b542b','#d7ad70','west'],fantasy:['#a98be8','#e0d0ff','fantasy'],
- world:['#187d83','#9ed9d4','world'],neon:['#00e5ff','#ff4fd8','neon'],
- championship:['#244f91','#d5ad50','championship']
+ classic:['#8b8172','#d4cbbb','✦'],royal:['#b58a2b','#f0d88e','♛'],
+ west:['#8b542b','#d7ad70','★'],fantasy:['#a98be8','#e0d0ff','✧'],
+ world:['#187d83','#9ed9d4','◆'],neon:['#00e5ff','#ff4fd8','✦'],
+ championship:['#244f91','#d5ad50','★']
 };
 check(Object.keys(api.CARD_THEMES).sort().join(',') === Object.keys(expectedThemes).sort().join(','),
   'all seven selectable card themes have renderer palettes');
@@ -94,7 +94,7 @@ check(['auto','classic','royal','west','fantasy','world','neon','championship'].
   'card theme selector exposes Auto and every supported theme');
 
 const themeSamples = [];
-for (const [name, [edge, accent, kind]] of Object.entries(expectedThemes)) {
+for (const [name, [edge, accent, mark]] of Object.entries(expectedThemes)) {
   els.cardTheme = Object.assign(mk(), { value: name });
   check(api.activeCardTheme() === name, name + ': manual theme selection is respected');
   const ace = api.cardSvg('A|♠');
@@ -103,10 +103,10 @@ for (const [name, [edge, accent, kind]] of Object.entries(expectedThemes)) {
   const joker = api.cardSvg('JK|b');
   themeSamples.push(ace);
   check(ace.includes('viewBox="0 0 60 84"') && ace.includes('stroke="' + edge + '"') &&
-    ace.includes('stroke="' + accent + '"') && ace.includes('>A</text>') && ace.includes('>♠</text>'),
+    ace.includes('fill="' + api.CARD_THEMES[name].bg + '"') && ace.includes('>A</text>') && ace.includes('>♠</text>'),
     name + ': ace retains readable rank and black suit inside the card frame');
   check(ten.includes('>10</text>') && ten.includes('>♥</text>') &&
-    ten.includes('#d1332e') && ten.includes('font-size="13"'),
+    ten.includes('fill="' + (name==='fantasy'?'#ff718e':name==='neon'?'#ff5b91':'#c52e38') + '"') && ten.includes('font-size="13"'),
     name + ': ten of hearts retains red suit and pip layout');
   check(queen.includes('>Q</text>') && queen.includes('>♦</text>') &&
     queen.includes(mark) && queen.includes('fill="' + api.CARD_THEMES[name].panel + '"'),
