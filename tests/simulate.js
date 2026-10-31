@@ -106,6 +106,15 @@ check(jokerCard.includes('font-size="9"') && jokerCard.includes('font-size="14"'
 check(html.includes('flex:0 0 clamp(64px,calc((100vw - 48px)/5),88px)') && html.includes('min-height:112px'),
   'hand cards are larger on phones while retaining horizontal scrolling');
 
+check(html.includes('iPhone landscape play layout') && html.includes('grid-template-areas:') && html.includes('"board title"'),
+  'landscape layout places the existing radial board beside the game controls');
+check(html.includes('id="rotateNotice"') && html.includes('Turn your iPhone sideways to play Marbles'),
+  'portrait phones receive a clear rotate-to-landscape prompt');
+check(html.includes('orientation:landscape') && html.includes('orientation:portrait'),
+  'responsive layout switches between landscape gameplay and portrait rotate prompt');
+check(html.includes('#hand{grid-area:hand') && html.includes('.card{flex:0 0 clamp(54px'),
+  'landscape hand keeps cards visible in a horizontally scrollable row');
+
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
 console.log('All checks passed');
 
