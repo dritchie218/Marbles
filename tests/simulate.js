@@ -15,6 +15,7 @@ const api = new Function(js + `
 return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,cardSvg,
   get speed(){return moveSpeed},
   get winner(){return {title:winnerTitle,names:winnerNames,players:winnerPlayers.slice()}},
+  get history(){return gameHistory},
   get s(){return {NP,T,E,CI,over,turn,pend,hands,pegs,SD,N,stuck,forcedCard}}}`)();
 
 let failed = 0;
@@ -88,6 +89,14 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   api.render();
 }
 const completedGameSnapshot = { winner: api.winner, hidden: els.winner.hidden, display: els.winner.style.display, title: els.winnerTitle.textContent, names: els.winnerNames.textContent };
+const latestHistory = api.history[api.history.length - 1];
+check(!!latestHistory && latestHistory.status === 'completed', 'completed game is saved in persistent game history');
+check(latestHistory.events.some(e => e.type === 'game-start') && latestHistory.events.some(e => e.type === 'game-completed'), 'game history records start and winning result');
+check(latestHistory.events.some(e => e.type === 'turn-start' && Array.isArray(e.drawnCards)), 'game history records each turn and the cards drawn');
+check(latestHistory.events.some(e => e.type === 'marble-move' && Array.isArray(e.state.pegs)), 'every marble movement stores the actual resulting board state');
+check(latestHistory.events.some(e => e.type === 'card-played'), 'game history records each played card');
+check(latestHistory.events.every((e, i) => e.number === i + 1 && e.state && Array.isArray(e.state.hands)), 'history events are sequential and include hand/state snapshots');
+
 
 // --- teammate 7-card split in either order ---
 rngSeed = 123456789;
