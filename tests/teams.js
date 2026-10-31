@@ -109,7 +109,7 @@ sevenMoves = api.moves(0, '7|♠');
 const goldFirst = sevenMoves.find(m => m.o === 2 && m.to === 31 && m.rem?.n === 1);
 check(!!goldFirst, '7 split: teammate can move six when own safe-lane marble can finish one');
 if (goldFirst) {
-  api.setPegs(2, [26, s.Y, s.Y, s.Y, s.Y]);
+  api.setPegs(2, [31, s.Y, s.Y, s.Y, s.Y]);
   check(api.second({ rem: goldFirst.rem, ex: [goldFirst.o, goldFirst.k] })
     .some(m => m.o === 0 && m.to === s.E + 2),
     '7 split: teammate six can be followed by own safe-lane one');
