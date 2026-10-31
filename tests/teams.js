@@ -172,6 +172,22 @@ const playingForTeammate = api.moves(0, 'JK|♠');
 owners = new Set(playingForTeammate.map(m => m.o));
 check(api.ctl(0) === 2 && owners.size === 1 && owners.has(2), 'Joker: moves teammate\'s marble after you finish and play for them');
 
+// Safe-lane marbles are committed: a Joker cannot move them out or target them.
+s = start(6);
+for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(0, [s.E + 1, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(2, [s.E + 2, s.Y, s.Y, s.Y, s.Y]);
+check(api.moves(0, 'JK|♠').length === 0,
+  'Joker: cannot move a safe-lane marble or swap with a safe-lane target');
+api.setPegs(0, [s.E + 1, 10, s.Y, s.Y, s.Y]);
+check(api.moves(0, 'JK|♠').length === 0,
+  'Joker: an active track marble cannot swap with a teammate safe-lane marble');
+api.setPegs(2, [15, s.Y, s.Y, s.Y, s.Y]);
+const committedJokerMoves = api.moves(0, 'JK|♠');
+check(committedJokerMoves.length > 0 &&
+  committedJokerMoves.every(m => m.k === 1 && m.to <= s.E),
+  'Joker: only the active track marble can swap with a main-track target');
+
 // If a Joker displaces a partner to their home gate, an opponent occupying
 // that same gate is knocked off the board rather than blocking the partner.
 s = start(6);
