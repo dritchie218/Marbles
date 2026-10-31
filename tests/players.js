@@ -103,20 +103,59 @@ let unfinished = 0, peeks = 0, games = 0; const unfinishedDetails = [];
 for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   rngSeed = 123456789;
   opts(np, tm); api.setWho([...w, 0, 0, 0, 0, 0, 0].slice(0, 6).map(Boolean)); api.init(); games++;
-  let n = 0;
-  while (!api.s.over && n++ < 200000) {
+  let n = 0, failure = null;
+  const seenStates = new Map();
+  const snapshot = z => ({
+    turn: z.turn, hands: z.hands, pegs: z.pegs, stuck: z.stuck,
+    forcedCard: z.forcedCard, pend: z.pend, cover: z.cover, over: z.over,
+    msg: z.msg, gid: z.gid
+  });
+  const signature = z => JSON.stringify(snapshot(z));
+  const details = reason => {
+    const z = api.s;
+    return {np,teams:tm,who:w,game:g,turn:z.turn,steps:n,reason,
+      stuck:z.stuck,forcedCard:z.forcedCard,pegs:z.pegs,
+      hands:z.hands.map(h=>h.map(c=>c.split('|')[0]))};
+  };
+  while (!api.s.over && n < 200000) {
     s = api.s;
-    if (!api.hu(s.turn)) { api.ai(); continue; }
+    const key = signature(s);
+    const visits = (seenStates.get(key) || 0) + 1;
+    seenStates.set(key, visits);
+    if (visits >= 3) { failure = 'repeated game state (seen 3 times)'; break; }
+    n++;
+    if (!api.hu(s.turn)) {
+      api.ai();
+      if (api.s.over) break;
+      continue;
+    }
     if (s.cover) api.ready();
     s = api.s;
     if (s.vw !== s.turn) peeks++;
     const h = s.hands[s.turn], i = h.findIndex((c, ci) => (s.stuck[s.turn] < 3 || ci === s.forcedCard[s.turn]) && api.moves(s.turn, c).length);
-    if (i < 0) { if (s.stuck[s.turn] >= 3) { unfinished++; break; } api.pick(0); continue; }
-    const ms = api.moves(s.turn, h[i]); api.act(s.turn, i, ms[Math.random() * ms.length | 0]);
+    if (i < 0) {
+      if (s.stuck[s.turn] >= 3) { failure = 'three failed draws with no forced legal move'; break; }
+      api.pick(0);
+      if (api.s.over) break;
+      continue;
+    }
+    const ms = api.moves(s.turn, h[i]);
+    api.act(s.turn, i, ms[Math.random() * ms.length | 0]);
+    if (api.s.over) break;
     const p = api.s.pend;
-    if (p) { const l = api.second(p); const b = l[Math.random() * l.length | 0]; api.step(b.o, b.k, b.to); api.fin(api.s.turn, p.ci); }
+    if (p) {
+      const l = api.second(p), b = l[Math.random() * l.length | 0];
+      api.step(b.o, b.k, b.to);
+      if (api.s.over) break;
+      api.fin(api.s.turn, p.ci);
+      if (api.s.over) break;
+    }
   }
-  if (!api.s.over) { unfinished++; const z=api.s; unfinishedDetails.push({np,teams:tm,who:w,game:g,turn:z.turn,steps:n,stuck:z.stuck,forcedCard:z.forcedCard,pegs:z.pegs,hands:z.hands.map(h=>h.map(c=>c.split('|')[0]))}); }
+  if (!api.s.over) {
+    failure = failure || (n >= 200000 ? 'step safety limit reached' : 'simulation ended without a win');
+    unfinished++;
+    unfinishedDetails.push(details(failure));
+  }
 }
 check(unfinished === 0, `${games} mixed person/computer games all finished${unfinishedDetails.length ? ' :: '+JSON.stringify(unfinishedDetails) : ''}`);
 check(peeks === 0, 'a person never plays while showing another person\'s cards');
