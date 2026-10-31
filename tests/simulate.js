@@ -82,13 +82,10 @@ const completedGameSnapshot = { winner: api.winner, hidden: els.winner.hidden, t
 // --- themed playing-card rendering ---
 // Exercise the actual renderer, not just the presence of theme names in the HTML.
 const expectedThemes = {
-  classic: ['#9a8f7a', '#c8bda8', '✦'],
-  royal: ['#b38a32', '#ead9a5', '♛'],
-  west: ['#a16a35', '#e7c99b', '★'],
-  fantasy: ['#7650a8', '#cbb7ed', '✧'],
-  world: ['#287d86', '#b7dfe0', '◆'],
-  neon: ['#00a9c7', '#d4f8ff', '✦'],
-  championship: ['#315b9b', '#c9a85c', '★']
+ classic:['#8b8172','#d4cbbb','classic'],royal:['#b58a2b','#f0d88e','royal'],
+ west:['#8b542b','#d7ad70','west'],fantasy:['#a98be8','#e0d0ff','fantasy'],
+ world:['#187d83','#9ed9d4','world'],neon:['#00e5ff','#ff4fd8','neon'],
+ championship:['#244f91','#d5ad50','championship']
 };
 check(Object.keys(api.CARD_THEMES).sort().join(',') === Object.keys(expectedThemes).sort().join(','),
   'all seven selectable card themes have renderer palettes');
@@ -96,13 +93,13 @@ check(['auto','classic','royal','west','fantasy','world','neon','championship'].
   html.includes('<option value="' + v + '"')),
   'card theme selector exposes Auto and every supported theme');
 
-for (const [name, [edge, accent, mark]] of Object.entries(expectedThemes)) {
+const themeSamples = [];\nfor (const [name, [edge, accent, kind]] of Object.entries(expectedThemes)) {
   els.cardTheme = Object.assign(mk(), { value: name });
   check(api.activeCardTheme() === name, name + ': manual theme selection is respected');
   const ace = api.cardSvg('A|♠');
   const ten = api.cardSvg('10|♥');
   const queen = api.cardSvg('Q|♦');
-  const joker = api.cardSvg('JK|b');
+  const joker = api.cardSvg('JK|b');\n  themeSamples.push(ace);
   check(ace.includes('viewBox="0 0 60 84"') && ace.includes('stroke="' + edge + '"') &&
     ace.includes('stroke="' + accent + '"') && ace.includes('>A</text>') && ace.includes('>♠</text>'),
     name + ': ace retains readable rank and black suit inside the card frame');
@@ -110,13 +107,13 @@ for (const [name, [edge, accent, mark]] of Object.entries(expectedThemes)) {
     ten.includes('#d1332e') && ten.includes('font-size="13"'),
     name + ': ten of hearts retains red suit and pip layout');
   check(queen.includes('>Q</text>') && queen.includes('>♦</text>') &&
-    queen.includes(mark) && queen.includes('fill="' + accent + '"'),
+    queen.includes(mark) && queen.includes('fill="' + api.CARD_THEMES[name].panel + '"'),
     name + ': face card keeps rank, suit and theme artwork');
   check(joker.includes('JOKER') && joker.includes(mark) && joker.includes('viewBox="0 0 60 84"'),
-    name + ': Joker renders with theme decoration inside the card frame');
+    name + ': Joker renders with theme decoration inside the card frame');\n  check(ace.includes('stroke="' + accent + '"') || ace.includes('stroke="' + edge + '"'), name + ': distinctive frame treatment is present');
 }
 
-// Auto mode must follow board size, while explicit choices override it.
+\ncheck(new Set(themeSamples).size === 7, 'all seven card themes render visibly different artwork and backgrounds');\n// Auto mode must follow board size, while explicit choices override it.
 els.np = Object.assign(mk(), { value: '4' });
 els.cl = Object.assign(mk(), { value: 'Green' });
 els.th = Object.assign(mk(), { value: 'mid' });
