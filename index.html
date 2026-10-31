@@ -87,7 +87,7 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
 <label><input type="checkbox" id="tm" checked onchange="newGame()"> Teams</label>
 <label>You: <select id="cl" onchange="newGame()"><option>Green</option><option>Red</option><option>Gold</option><option>Sky</option><option>Indigo</option><option>Pink</option></select></label>
 <label>Moves: <select id="speed" onchange="setSpeed(this.value)"><option value="slow">Slow</option><option value="normal" selected>Normal</option><option value="fast">Fast</option></select></label>
-<select id="th" onchange="render()"><option value="mid">Midnight</option><option value="oak">Oak</option><option value="vik" selected>MN football (purple &amp; gold)</option><option value="wild">MN hockey (green &amp; red)</option><option value="twn">MN baseball (navy &amp; red)</option></select></div>
+<select id="th" onchange="render()"><option value="mid">Midnight</option><option value="oak">Oak</option><option value="vik" selected>MN football (purple &amp; gold)</option><option value="wild">MN hockey (green &amp; red)</option><option value="twn">MN baseball (navy &amp; red)</option></select><label>Cards: <select id="cardTheme" onchange="setCardTheme(this.value)"><option value="auto" selected>Auto (by board)</option><option value="classic">Classic</option><option value="royal">Royal Casino</option><option value="west">Wild West</option><option value="fantasy">Fantasy Kingdom</option><option value="world">World Tour</option><option value="neon">Neon Arcade</option><option value="championship">Championship</option></select></label></div>
 <svg id="b" viewBox="0 0 400 400"></svg>
 <div id="mv" aria-live="polite"></div>
 <div id="tl"></div>
@@ -131,15 +131,19 @@ const HP=[[0,1],[1,0],[0,-1],[-1,0],[0,0]],SF=[[3,1],[3,2],[3,3],[4,3],[5,3]];
 function pos(p,u,k){if(u<-50)return W(p,CI+1+HP[k][0],2+HP[k][1]);if(u<=E)return tp(abs(p,u));return W(p,...SF[u-E-1])}
 const SU={'♠':'#1b1f2a','♣':'#1b1f2a','♥':'#d1332e','♦':'#d1332e'},P4=[['l',20],['r',20],['l',64],['r',64]],P6=[...P4,['l',42],['r',42]],PX={l:19,c:30,r:41};
 const PIPS={'2':[['c',20],['c',64]],'3':[['c',20],['c',42],['c',64]],'4':P4,'5':[...P4,['c',42]],'6':P6,'7':[...P6,['c',31]],'8':[...P6,['c',31],['c',53]],'9':[...P4,['l',33],['r',33],['l',51],['r',51],['c',42]],'10':[...P4,['l',33],['r',33],['l',51],['r',51],['c',26.5],['c',57.5]]};
-function cardSvg(c){const[r,s]=c.split('|'),F='font-family="Georgia,serif" font-weight="700"',bg='<rect x=".8" y=".8" width="58.4" height="82.4" rx="6" fill="#fffdf6" stroke="#9a8f7a" stroke-width="1.2"/>';
-if(r=='JK'){const k=s=='r'?'#d1332e':'#1b1f2a';return `<svg viewBox="0 0 60 84">${bg}<path d="M14 54L18 22 26 38 30 18 34 38 42 22 46 54Z" fill="${k}"/><rect x="14" y="52" width="32" height="7" rx="2" fill="#e3b53a"/>${[[18,21],[30,17],[42,21]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#e3b53a"/>`).join('')}<text x="30" y="73" text-anchor="middle" ${F} font-size="8" letter-spacing="1" fill="${k}">JOKER</text><text x="8" y="14" text-anchor="middle" ${F} font-size="11" fill="${k}">J</text><text x="8" y="25" text-anchor="middle" font-size="10" fill="${k}">★</text></svg>`}
-const k=SU[s],cor=`<text x="8" y="14" font-size="${r=='10'?9:11}">${r}</text><text x="8" y="25" font-size="10">${s}</text>`;let b='';
-if(r=='A')b=`<text x="30" y="53" text-anchor="middle" font-size="34">${s}</text>`;
-else if(PIPS[r])b=PIPS[r].map(([c,y])=>`<text x="${PX[c]}" y="${y+4.5}" text-anchor="middle" font-size="13"${y>42?` transform="rotate(180 ${PX[c]} ${y})"`:''}>${s}</text>`).join('');
-else{const cr=r=='J'?'M20 35Q24 22 42 28L40 35Z':'M19 35L19 25 25 30 30 23 35 30 41 25 41 35Z';
-b=`<rect x="13" y="13" width="34" height="58" rx="3" fill="${k}" fill-opacity=".07" stroke="${k}" stroke-opacity=".5"/><path d="${cr}" fill="#e3b53a" stroke="${k}" stroke-width=".8"/>${r=='Q'?'<circle cx="30" cy="20" r="2.5" fill="#e3b53a" stroke="'+k+'" stroke-width=".8"/>':''}<text x="30" y="55" text-anchor="middle" font-size="22">${r}</text><text x="30" y="67" text-anchor="middle" font-size="11">${s}</text>`}
-return `<svg viewBox="0 0 60 84">${bg}<g fill="${k}" ${F} text-anchor="middle">${cor}<g transform="rotate(180 30 42)">${cor}</g>${b}</g></svg>`}
-function fill(p,n){while(hands[p].length<n){if(!deck.length){deck=shuf(disc);disc=[]}if(!deck.length)return;hands[p].push(deck.pop())}}
+const CARD_THEMES={classic:{edge:'#9a8f7a',accent:'#c8bda8',ink:'#2b2118',mark:'✦'},royal:{edge:'#b38a32',accent:'#ead9a5',ink:'#503817',mark:'♛'},west:{edge:'#a16a35',accent:'#e7c99b',ink:'#70421f',mark:'★'},fantasy:{edge:'#7650a8',accent:'#cbb7ed',ink:'#43265f',mark:'✧'},world:{edge:'#287d86',accent:'#b7dfe0',ink:'#174f59',mark:'◆'},neon:{edge:'#00a9c7',accent:'#d4f8ff',ink:'#163d58',mark:'✦'},championship:{edge:'#315b9b',accent:'#c9a85c',ink:'#1e3d6d',mark:'★'}};
+function activeCardTheme(){const v=$('cardTheme')?.value||'auto';return v==='auto'?(NP===6?'world':'royal'):v}
+function setCardTheme(v){try{localStorage.setItem('marbles-card-theme',v)}catch(e){}render()}
+function cardSvg(c){const[r,s]=c.split('|'),theme=CARD_THEMES[activeCardTheme()]||CARD_THEMES.classic,F='font-family="Georgia,serif" font-weight="700"',k=SU[s]||'#1b1f2a';
+const bg='<rect x=".8" y=".8" width="58.4" height="82.4" rx="6" fill="#fffdf8" stroke="'+theme.edge+'" stroke-width="1.5"/><rect x="3.5" y="3.5" width="53" height="77" rx="4" fill="none" stroke="'+theme.accent+'" stroke-width=".65"/><path d="M7 30V7H53V30M7 54V77H53V54" fill="none" stroke="'+theme.accent+'" stroke-width=".55" opacity=".7"/>',
+const corner='<path d="M5 5l3 3-3 3-3-3zM55 5l3 3-3 3-3-3zM5 73l3 3-3 3-3-3zM55 73l3 3-3 3-3-3z" fill="'+theme.edge+'" opacity=".8"/> ';
+if(r==='JK'){const ink=s==='r'?'#b52e32':theme.ink;return '<svg viewBox="0 0 60 84">'+bg+corner+'<g fill="'+ink+'" '+F+'><text x="8" y="17" text-anchor="middle" font-size="12">J</text><text x="52" y="17" text-anchor="middle" font-size="12">J</text><text x="30" y="21" text-anchor="middle" font-size="10" fill="'+theme.edge+'">'+theme.mark+'</text><path d="M14 53L18 29 26 42 30 25 34 42 42 29 46 53Z" fill="'+theme.edge+'" stroke="'+ink+'" stroke-width="1"/><path d="M18 55H42" stroke="'+ink+'" stroke-width="2"/><text x="30" y="70" text-anchor="middle" font-size="9" letter-spacing="1.1">JOKER</text></g></svg>'}
+const cor='<text x="8" y="16" font-size="'+(r==='10'?9:12)+'">'+r+'</text><text x="8" y="27" font-size="11">'+s+'</text>';let b='';
+if(r==='A')b='<text x="30" y="54" text-anchor="middle" font-size="36">'+s+'</text>';
+else if(PIPS[r])b=PIPS[r].map(([c,y])=>'<text x="'+PX[c]+'" y="'+(y+4.5)+'" text-anchor="middle" font-size="13"'+(y>42?' transform="rotate(180 '+PX[c]+' '+y+')"':'')+'>'+s+'</text>').join('');
+else{const crown=r==='J'?'M20 35Q24 22 42 28L40 35Z':'M19 35L19 25 25 30 30 23 35 30 41 25 41 35Z';b='<rect x="13" y="13" width="34" height="58" rx="3" fill="'+theme.accent+'" fill-opacity=".13" stroke="'+theme.edge+'" stroke-opacity=".6"/><text x="30" y="21" text-anchor="middle" font-size="9" fill="'+theme.edge+'">'+theme.mark+'</text><path d="'+crown+'" fill="'+theme.edge+'" stroke="'+k+'" stroke-width=".8"/><text x="30" y="55" text-anchor="middle" font-size="22">'+r+'</text><text x="30" y="67" text-anchor="middle" font-size="11">'+s+'</text>'}
+return '<svg viewBox="0 0 60 84">'+bg+corner+'<g fill="'+k+'" '+F+' text-anchor="middle">'+cor+'<g transform="rotate(180 30 42)">'+cor+'</g>'+b+'</g></svg>'
+}function fill(p,n){while(hands[p].length<n){if(!deck.length){deck=shuf(disc);disc=[]}if(!deck.length)return;hands[p].push(deck.pop())}}
 function setSpeed(v){moveSpeed=['slow','normal','fast'].includes(v)?v:'normal';const scale=moveSpeed==='slow'?1.8:moveSpeed==='fast'?.45:1;document.documentElement?.style?.setProperty('--move-scale',scale);try{localStorage.setItem('marbles-speed',moveSpeed)}catch(e){}if(NP)render()}
 function speedDelay(){return moveSpeed==='slow'?.34:moveSpeed==='fast'?.055:.16}
 function speedDuration(){return moveSpeed==='slow'?5000:moveSpeed==='fast'?1000:2800}
@@ -208,7 +212,7 @@ s+=`<polyline points="${lane}" fill="none" stroke="${c}" stroke-opacity=".3" str
 for(const q of[tp(A(p)),tp(abs(p,E))])s+=`<circle cx="${q[0]}" cy="${q[1]}" r="${r1(.44*K)}" fill="none" stroke="${c}" stroke-width="1.8"/>`;
 for(let k=0;k<5;k++)s+=hole(pos(p,Y,k),.26)+hole(sf[k],.26)}
 return s}
-function render(){cur=over||setup||cover||!hu(turn)?[]:pend?second(pend):sel!=null?moves(turn,hands[turn][sel]):[];
+function render(){if($('cardTheme')){try{$('cardTheme').value=localStorage.getItem('marbles-card-theme')||'auto'}catch(e){$('cardTheme').value='auto'}}cur=over||setup||cover||!hu(turn)?[]:pend?second(pend):sel!=null?moves(turn,hands[turn][sel]):[];
 $('b').setAttribute('viewBox',NP==6?'-10 20 420 360':'30 30 340 340');
 let s=board();
 const movingTrack=!!(lastMove&&lastMove.from>=0&&lastMove.from<=E&&lastMove.to>=0&&lastMove.to<=E&&Math.abs(lastMove.to-lastMove.from)>1);
