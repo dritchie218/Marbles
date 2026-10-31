@@ -20,7 +20,7 @@ svg{width:100%;height:auto;display:block}
 #mv{display:none;border:2px solid var(--bd);border-radius:10px;padding:9px 12px;margin:5px 0;background:var(--card);font-size:15px;font-weight:700;line-height:1.35}#mv.show{display:block}#st{font-weight:600;min-height:22px;margin:6px 0 0}#dc{border:1px solid var(--bd);border-radius:9px;padding:7px 10px;margin:5px 0;background:var(--card);font-size:13px}#dc:empty{display:none}#dc .sr{display:flex;align-items:center;gap:7px;margin:4px 0;min-height:22px}#dc .name{font-weight:600}#dc .dots{display:inline-flex;gap:4px;margin-left:auto;align-items:center}#dc .dot{display:inline-block;width:11px;height:11px;border:1.5px solid var(--bd);border-radius:50%}#dc .note{font-weight:600;margin-left:5px}#lg{font-size:13px;opacity:.75;min-height:18px;margin:2px 0 8px}
 #hand{display:flex;gap:5px;overflow-x:auto;padding:3px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
 #tl{font-size:12px;opacity:.85;margin:4px 0 0;line-height:1.6}#tl:empty{display:none}#tl i{display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 3px 0 5px;vertical-align:-1px}
-.card{flex:0 0 58px;min-width:58px;min-height:0;border:2px solid var(--bd);border-radius:9px;background:#fffdf8;color:#171b22;display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit;padding:3px 2px;scroll-snap-align:start}.card svg{width:100%;height:auto;display:block}.card small{font-size:10px;opacity:1;margin-top:2px}
+.card{flex:0 0 58px;min-width:58px;min-height:0;border:2px solid var(--bd);border-radius:9px;background:#fff;color:#10141b;display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit;padding:3px 2px;scroll-snap-align:start}.card svg{width:100%;height:auto;display:block}.card small{font-size:10px;opacity:1;margin-top:2px}
 #log{max-height:170px;overflow:auto;font-size:13px;line-height:1.5}#log i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
 .card.on{border-color:#2f7de1;transform:translateY(-6px);box-shadow:0 4px 10px rgba(0,0,0,.25)}.card.locked{opacity:.4;filter:grayscale(1)}.card:disabled{cursor:not-allowed}
 button.n{font:inherit;font-size:13px;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:8px;padding:4px 10px}
@@ -51,8 +51,8 @@ h1{font-size:24px;margin:4px 0 8px}
 #ctl input[type=checkbox]{width:22px;height:22px}
 #b{width:100%;max-width:680px;margin:0 auto;touch-action:manipulation}
 #hand{gap:6px;overflow-x:auto;align-items:stretch;padding:8px 2px 12px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
-.card{flex:0 0 clamp(54px,calc((100vw - 58px)/6),82px);min-height:100px;padding:5px 3px;scroll-snap-align:start;touch-action:manipulation}
-.card svg{width:100%;max-width:76px}
+.card{flex:0 0 clamp(64px,calc((100vw - 48px)/5),88px);min-height:112px;padding:5px 3px;scroll-snap-align:start;touch-action:manipulation}
+.card svg{width:100%;max-width:82px}
 .card small{font-size:11px;line-height:1.2;text-align:center}
 .card.on{transform:translateY(-3px)}
 button.n{font-size:15px;min-height:40px;padding:7px 12px;touch-action:manipulation}
@@ -72,13 +72,13 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
 @media(min-width:600px){
   #app{padding-left:12px;padding-right:12px}
   #b{max-height:none}
-  .card{flex-basis:72px}
+  .card{flex-basis:78px}
 }
 @media(max-width:380px){
   #app{padding-left:5px;padding-right:5px}
   h1{font-size:22px}
   #ctl{gap:5px 7px}
-  .card{flex-basis:52px}
+  .card{flex-basis:64px}
 }
 </style></head><body><div id="app">
 <h1>Marbles <button class="n" onclick="newGame()">New game</button></h1>
@@ -130,13 +130,13 @@ const HP=[[0,1],[1,0],[0,-1],[-1,0],[0,0]],SF=[[3,1],[3,2],[3,3],[4,3],[5,3]];
 function pos(p,u,k){if(u<-50)return W(p,CI+1+HP[k][0],2+HP[k][1]);if(u<=E)return tp(abs(p,u));return W(p,...SF[u-E-1])}
 const SU={'♠':'#1b1f2a','♣':'#1b1f2a','♥':'#d1332e','♦':'#d1332e'},P4=[['l',20],['r',20],['l',64],['r',64]],P6=[...P4,['l',42],['r',42]],PX={l:19,c:30,r:41};
 const PIPS={'2':[['c',20],['c',64]],'3':[['c',20],['c',42],['c',64]],'4':P4,'5':[...P4,['c',42]],'6':P6,'7':[...P6,['c',31]],'8':[...P6,['c',31],['c',53]],'9':[...P4,['l',33],['r',33],['l',51],['r',51],['c',42]],'10':[...P4,['l',33],['r',33],['l',51],['r',51],['c',26.5],['c',57.5]]};
-function cardSvg(c){const[r,s]=c.split('|'),F='font-family="Georgia,serif" font-weight="700"',bg='<rect x=".8" y=".8" width="58.4" height="82.4" rx="6" fill="#fffdf6" stroke="#9a8f7a" stroke-width="1.2"/>';
-if(r=='JK'){const k=s=='r'?'#d1332e':'#1b1f2a';return `<svg viewBox="0 0 60 84">${bg}<path d="M14 54L18 22 26 38 30 18 34 38 42 22 46 54Z" fill="${k}"/><rect x="14" y="52" width="32" height="7" rx="2" fill="#e3b53a"/>${[[18,21],[30,17],[42,21]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#e3b53a"/>`).join('')}<text x="30" y="73" text-anchor="middle" ${F} font-size="8" letter-spacing="1" fill="${k}">JOKER</text><text x="8" y="14" text-anchor="middle" ${F} font-size="11" fill="${k}">J</text><text x="8" y="25" text-anchor="middle" font-size="10" fill="${k}">★</text></svg>`}
-const k=SU[s],cor=`<text x="8" y="14" font-size="${r=='10'?9:11}">${r}</text><text x="8" y="25" font-size="10">${s}</text>`;let b='';
-if(r=='A')b=`<text x="30" y="53" text-anchor="middle" font-size="34">${s}</text>`;
-else if(PIPS[r])b=PIPS[r].map(([c,y])=>`<text x="${PX[c]}" y="${y+4.5}" text-anchor="middle" font-size="13"${y>42?` transform="rotate(180 ${PX[c]} ${y})"`:''}>${s}</text>`).join('');
+function cardSvg(c){const[r,s]=c.split('|'),F='font-family="Georgia,serif" font-weight="700"',bg='<rect x=".8" y=".8" width="58.4" height="82.4" rx="6" fill="#fffdf6" stroke="#625b50" stroke-width="1.6"/>';
+if(r=='JK'){const k=s=='r'?'#d1332e':'#1b1f2a';return `<svg viewBox="0 0 60 84">${bg}<path d="M14 54L18 22 26 38 30 18 34 38 42 22 46 54Z" fill="${k}"/><rect x="14" y="52" width="32" height="7" rx="2" fill="#e3b53a"/>${[[18,21],[30,17],[42,21]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#e3b53a"/>`).join('')}<text x="30" y="73" text-anchor="middle" ${F} font-size="9" letter-spacing=".7" fill="${k}">JOKER</text><text x="8" y="14" text-anchor="middle" ${F} font-size="14" fill="${k}">J</text><text x="8" y="25" text-anchor="middle" font-size="12" fill="${k}">★</text></svg>`}
+const k=SU[s],cor=`<text x="8" y="14" font-size="${r=='10'?12:14}">${r}</text><text x="8" y="25" font-size="13">${s}</text>`;let b='';
+if(r=='A')b=`<text x="30" y="53" text-anchor="middle" font-size="40">${s}</text>`;
+else if(PIPS[r])b=PIPS[r].map(([c,y])=>`<text x="${PX[c]}" y="${y+4.5}" text-anchor="middle" font-size="15"${y>42?` transform="rotate(180 ${PX[c]} ${y})"`:''}>${s}</text>`).join('');
 else{const cr=r=='J'?'M20 35Q24 22 42 28L40 35Z':'M19 35L19 25 25 30 30 23 35 30 41 25 41 35Z';
-b=`<rect x="13" y="13" width="34" height="58" rx="3" fill="${k}" fill-opacity=".07" stroke="${k}" stroke-opacity=".5"/><path d="${cr}" fill="#e3b53a" stroke="${k}" stroke-width=".8"/>${r=='Q'?'<circle cx="30" cy="20" r="2.5" fill="#e3b53a" stroke="'+k+'" stroke-width=".8"/>':''}<text x="30" y="55" text-anchor="middle" font-size="22">${r}</text><text x="30" y="67" text-anchor="middle" font-size="11">${s}</text>`}
+b=`<rect x="13" y="13" width="34" height="58" rx="3" fill="${k}" fill-opacity=".07" stroke="${k}" stroke-opacity=".5"/><path d="${cr}" fill="#e3b53a" stroke="${k}" stroke-width=".8"/>${r=='Q'?'<circle cx="30" cy="20" r="2.5" fill="#e3b53a" stroke="'+k+'" stroke-width=".8"/>':''}<text x="30" y="55" text-anchor="middle" font-size="27">${r}</text><text x="30" y="67" text-anchor="middle" font-size="13">${s}</text>`}
 return `<svg viewBox="0 0 60 84">${bg}<g fill="${k}" ${F} text-anchor="middle">${cor}<g transform="rotate(180 30 42)">${cor}</g>${b}</g></svg>`}
 function fill(p,n){while(hands[p].length<n){if(!deck.length){deck=shuf(disc);disc=[]}if(!deck.length)return;hands[p].push(deck.pop())}}
 function setSpeed(v){moveSpeed=['slow','normal','fast'].includes(v)?v:'normal';const scale=moveSpeed==='slow'?1.8:moveSpeed==='fast'?.45:1;document.documentElement?.style?.setProperty('--move-scale',scale);try{localStorage.setItem('marbles-speed',moveSpeed)}catch(e){}if(NP)render()}
