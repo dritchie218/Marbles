@@ -99,7 +99,7 @@ check(api.s.over && api.s.msg === 'Gold wins! 🎉', 'individual person win mess
 
 // --- full simulated games with a mix of people and computers ---
 const mixes = [['4', true, [1, 1, 0, 0]], ['4', true, [1, 1, 1, 1]], ['6', true, [1, 0, 1, 1, 0, 0]], ['6', false, [1, 1, 1, 1, 1, 1]], ['4', false, [1, 0, 1, 0]]];
-let unfinished = 0, peeks = 0, games = 0;
+let unfinished = 0, peeks = 0, games = 0; const unfinishedDetails = [];
 for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   rngSeed = 123456789;
   opts(np, tm); api.setWho([...w, 0, 0, 0, 0, 0, 0].slice(0, 6).map(Boolean)); api.init(); games++;
@@ -116,9 +116,9 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
     const p = api.s.pend;
     if (p) { const l = api.second(p); const b = l[Math.random() * l.length | 0]; api.step(b.o, b.k, b.to); api.fin(api.s.turn, p.ci); }
   }
-  if (!api.s.over) unfinished++;
+  if (!api.s.over) { unfinished++; const z=api.s; unfinishedDetails.push({np,teams:tm,who:w,game:g,turn:z.turn,steps:n,stuck:z.stuck,forcedCard:z.forcedCard,pegs:z.pegs,hands:z.hands.map(h=>h.map(c=>c.split('|')[0]))}); }
 }
-check(unfinished === 0, `${games} mixed person/computer games all finished`);
+check(unfinished === 0, `${games} mixed person/computer games all finished${unfinishedDetails.length ? ' :: '+JSON.stringify(unfinishedDetails) : ''}`);
 check(peeks === 0, 'a person never plays while showing another person\'s cards');
 
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
