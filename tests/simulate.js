@@ -79,6 +79,39 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
 }
 const completedGameSnapshot = { winner: api.winner, hidden: els.winner.hidden, display: els.winner.style.display, title: els.winnerTitle.textContent, names: els.winnerNames.textContent };
 
+// --- teammate 7-card split in either order ---
+rngSeed = 123456789;
+els.np = Object.assign(mk(), { value: '4' });
+els.cl = Object.assign(mk(), { value: 'Green' });
+els.th = Object.assign(mk(), { value: 'mid' });
+els.tm = Object.assign(mk(), { checked: true });
+api.init();
+let splitState = api.s;
+splitState.pegs.forEach(P => P.fill(-99));
+splitState.pegs[0][0] = 10; // Green / You
+splitState.pegs[2][0] = 25; // Gold / teammate
+let sevenMoves = api.moves(0, '7|♦');
+const goldSix = sevenMoves.find(a => a.o === 2 && a.k === 0 && a.to === 31 && a.rem?.n === 1);
+check(!!goldSix, '7 card offers Gold teammate six spaces with one space remaining for Green');
+if (goldSix) {
+  splitState.pegs[2][0] = goldSix.to;
+  const greenOne = api.second({ rem: goldSix.rem, ex: [goldSix.o, goldSix.k] });
+  check(greenOne.some(a => a.o === 0 && a.k === 0 && a.to === 11),
+    'Gold six followed by Green one is a legal teammate split');
+}
+splitState.pegs.forEach(P => P.fill(-99));
+splitState.pegs[0][0] = 10;
+splitState.pegs[2][0] = 25;
+sevenMoves = api.moves(0, '7|♦');
+const greenOneFirst = sevenMoves.find(a => a.o === 0 && a.k === 0 && a.to === 11 && a.rem?.n === 6);
+check(!!greenOneFirst, '7 card offers Green one space with six spaces remaining for Gold');
+if (greenOneFirst) {
+  splitState.pegs[0][0] = greenOneFirst.to;
+  const goldSixSecond = api.second({ rem: greenOneFirst.rem, ex: [greenOneFirst.o, greenOneFirst.k] });
+  check(goldSixSecond.some(a => a.o === 2 && a.k === 0 && a.to === 31),
+    'Green one followed by Gold six is a legal teammate split');
+}
+
 // --- single standard playing-card design ---
 // The deck uses one consistent face design for every board and player count.
 check(!html.includes('cardTheme') && !html.includes('CARD_THEMES') && !html.includes('marbles-card-theme'),
