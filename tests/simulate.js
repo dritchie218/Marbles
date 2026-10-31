@@ -127,13 +127,13 @@ els.th = Object.assign(mk(), { value: 'mid' });
 els.cardTheme = Object.assign(mk(), { value: 'auto' });
 api.init();
 check(api.activeCardTheme() === 'royal', 'Auto selects Royal Casino on a four-player board');
-check(api.cardSvg('K|♣').includes('fill="#fff5d9"'), 'four-player auto theme is applied to rendered cards');
+check(api.cardSvg('K|♣').includes('stroke="#b58a2b"'), 'four-player auto theme is applied to rendered cards');
 els.np.value = '6';
 api.init();
 check(api.activeCardTheme() === 'world', 'Auto selects World Tour on a six-player board');
-check(api.cardSvg('K|♣').includes('fill="#e7f5ef"'), 'six-player auto theme is applied to rendered cards');
+check(api.cardSvg('K|♣').includes('stroke="#187d83"'), 'six-player auto theme is applied to rendered cards');
 els.cardTheme.value = 'fantasy';
-check(api.activeCardTheme() === 'fantasy' && api.cardSvg('K|♣').includes('fill="#241638"'),
+check(api.activeCardTheme() === 'fantasy' && api.cardSvg('K|♣').includes('stroke="#a98be8"'),
   'manual theme overrides the automatic board theme');
 
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
