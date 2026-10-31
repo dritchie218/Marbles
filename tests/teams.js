@@ -89,6 +89,32 @@ if (teammateFirst) {
   check(remaining.some(m => m.o === 0), '7 split: teammate-first move leaves at least one space for your own marble');
   check(remaining.every(m => m.o === 0), '7 split: teammate-first move must finish with your own marble');
 }
+// Safe-lane marbles are still in play and may contribute to a 7 split.
+s = start(4);
+for (let p = 0; p < 4; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(0, [s.E + 1, s.Y, s.Y, s.Y, s.Y]); // Green in safe lane
+api.setPegs(2, [25, s.Y, s.Y, s.Y, s.Y]); // Gold on track
+sevenMoves = api.moves(0, '7|♠');
+const safeGreenFirst = sevenMoves.find(m => m.o === 0 && m.to === s.E + 2 && m.rem?.n === 6);
+check(!!safeGreenFirst, '7 split: own safe-lane marble can move one before teammate moves six');
+if (safeGreenFirst) {
+  api.setPegs(0, [s.E + 2, s.Y, s.Y, s.Y, s.Y]);
+  check(api.second({ rem: safeGreenFirst.rem, ex: [safeGreenFirst.o, safeGreenFirst.k] })
+    .some(m => m.o === 2 && m.to === 31),
+    '7 split: safe-lane own move can be followed by teammate six');
+}
+api.setPegs(0, [s.E + 1, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(2, [25, s.Y, s.Y, s.Y, s.Y]);
+sevenMoves = api.moves(0, '7|♠');
+const goldFirst = sevenMoves.find(m => m.o === 2 && m.to === 26 && m.rem?.n === 6);
+check(!!goldFirst, '7 split: teammate can move six when own safe-lane marble can finish one');
+if (goldFirst) {
+  api.setPegs(2, [26, s.Y, s.Y, s.Y, s.Y]);
+  check(api.second({ rem: goldFirst.rem, ex: [goldFirst.o, goldFirst.k] })
+    .some(m => m.o === 0 && m.to === s.E + 2),
+    '7 split: teammate six can be followed by own safe-lane one');
+}
+
 for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
 api.setPegs(2, [8, s.Y, s.Y, s.Y, s.Y]);
 check(api.moves(0, '7|♠').length === 0, '7: unavailable when you have no marble in play, even if a teammate does');
