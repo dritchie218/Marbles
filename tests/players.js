@@ -103,6 +103,8 @@ let unfinished = 0, peeks = 0, games = 0; const unfinishedDetails = [];
 for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   rngSeed = 123456789;
   opts(np, tm); api.setWho([...w, 0, 0, 0, 0, 0, 0].slice(0, 6).map(Boolean)); api.init(); games++;
+  const gameStarted = process.hrtime.bigint();
+  console.log(`[SIM] Game ${games}/60 START — players=${np}, teams=${tm}, mix=${w.join('')}`);
   let n = 0, failure = null;
   const seenStates = new Map();
   const snapshot = z => ({
@@ -151,13 +153,20 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
       if (api.s.over) break;
     }
   }
+  const elapsedMs = Number(process.hrtime.bigint() - gameStarted) / 1e6;
   if (!api.s.over) {
     failure = failure || (n >= 200000 ? 'step safety limit reached' : 'simulation ended without a win');
     unfinished++;
-    unfinishedDetails.push(details(failure));
+    const diagnostic = details(failure);
+    unfinishedDetails.push(diagnostic);
+    console.log(`[SIM] Game ${games}/60 FAIL — ${failure}; steps=${n}; elapsed=${elapsedMs.toFixed(0)}ms; turn=${diagnostic.turn}`);
+  } else {
+    console.log(`[SIM] Game ${games}/60 PASS — winner=${api.s.msg}; steps=${n}; elapsed=${elapsedMs.toFixed(0)}ms`);
   }
+  console.log(`[SIM] Progress: ${games}/60 games processed; ${games - unfinished}/${games} completed; ${unfinished} failed`);
 }
-check(unfinished === 0, `${games} mixed person/computer games all finished${unfinishedDetails.length ? ' :: '+JSON.stringify(unfinishedDetails) : ''}`);
+console.log(`[SIM] FINAL: ${games - unfinished}/${games} games completed; ${unfinished} unfinished; ${peeks} privacy violations`);
+check(games === 60 && unfinished === 0, `${games}/60 mixed person/computer games all finished${unfinishedDetails.length ? ' :: '+JSON.stringify(unfinishedDetails) : ''}`);
 check(peeks === 0, 'a person never plays while showing another person\'s cards');
 
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
