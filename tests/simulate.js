@@ -49,6 +49,16 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   const gateCrossing = api.moves(0, '3|♠');
   check(gateCrossing.length === 1 && gateCrossing[0].to === s.E + 1,
     `${np} players: only legal move can cross own home gate into the safe lane`);
+  // Passing the home gate is legal: if the move overshoots the safe lane, it wraps around the main track.
+  s.pegs[0].fill(-99); s.pegs[0][0] = s.E;
+  const passGateTen = api.moves(0, '10|♠');
+  check(passGateTen.length === 1 && passGateTen[0].to === 5,
+    `${np} players: a 10 from the home gate passes it and continues around the main track`);
+  s.pegs[0][0] = s.E - 2;
+  const landInHomeLane = api.moves(0, '3|♠');
+  check(landInHomeLane.length === 1 && landInHomeLane[0].to === s.E + 1,
+    `${np} players: a move that lands in the home lane still enters it`);
+  s.pegs[0].fill(-99);
   s.pegs[0][0] = -99;
   const sideX = [];
   for (let t = 0; t <= 18; t++) sideX.push(api.W(0, t, 0)[0]);
