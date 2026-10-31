@@ -178,7 +178,7 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://fpxyqizszalqjasbposc.supabase.co',SUPABASE_KEY='sb_publishable_LskL-qw0olsuwVBWhnEoMg_wSp0z385';
-const sb=window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
+const sb=typeof window!=='undefined'&&window.supabase?.createClient?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
 let cloudUser=null,cloudProfile=null,cloudStats=null,cloudStatus='Guest mode — no email required.',cloudMatchKey=null,cloudSaving=false;
 const N=18,CI=7,G=5,Y=-99,C6=['#3fae6a','#ee7fa8','#1b1b1b','#8b2a73','#4b2fa0','#7fb0e8'],N6=['You','Pink','Black','Magenta','Indigo','Sky'],C4=['#d93a3a','#1b1b1b','#2f9a55','#2a4fc4'],N4=['You','Black','Green','Blue'];let COL,NAME;
 const H={A:'out · 1',K:'out · 13',Q:'out · 12',J:'out · 11','7':'split 7','8':'back 8','9':'fwd + back',JK:'swap'};
