@@ -114,6 +114,15 @@ if (goldFirst) {
     .some(m => m.o === 0 && m.to === s.E + 2),
     '7 split: teammate six can be followed by own safe-lane one');
 }
+// A 7 may advance a safe-lane marble, but it must never wrap that marble
+// back onto the main track when the remaining movement exceeds the home lane.
+api.setPegs(0, [s.E + 4, s.Y, s.Y, s.Y, s.Y]);
+api.setPegs(2, [25, s.Y, s.Y, s.Y, s.Y]);
+sevenMoves = api.moves(0, '7|♠');
+check(!sevenMoves.some(m => m.o === 0 && m.to <= s.E),
+  '7: a safe-lane marble cannot wrap out onto the main track');
+check(sevenMoves.some(m => m.o === 0 && m.to === s.E + 5 && m.rem?.n === 6),
+  '7 split: safe-lane marble can finish without leaving home');
 
 for (let p = 0; p < 6; p++) api.setPegs(p, [s.Y, s.Y, s.Y, s.Y, s.Y]);
 api.setPegs(2, [8, s.Y, s.Y, s.Y, s.Y]);
