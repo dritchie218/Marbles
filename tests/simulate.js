@@ -103,10 +103,10 @@ for (const [name, [edge, accent, mark]] of Object.entries(expectedThemes)) {
   const joker = api.cardSvg('JK|b');
   themeSamples.push(ace);
   check(ace.includes('viewBox="0 0 60 84"') && ace.includes('stroke="' + edge + '"') &&
-    ace.includes('fill="' + api.CARD_THEMES[name].bg + '"') && ace.includes('>A</text>') && ace.includes('>♠</text>'),
+    ace.includes('fill="#fffdf8"') && ace.includes('>A</text>') && ace.includes('>♠</text>'),
     name + ': ace retains readable rank and black suit inside the card frame');
   check(ten.includes('>10</text>') && ten.includes('>♥</text>') &&
-    ten.includes('fill="' + (name==='fantasy'?'#ff718e':name==='neon'?'#ff5b91':'#c52e38') + '"') && ten.includes('font-size="13"'),
+    ten.includes('fill="' + '#c62828' + '"') && ten.includes('font-size="17"'),
     name + ': ten of hearts retains red suit and pip layout');
   check(queen.includes('>Q</text>') && queen.includes('>♦</text>') &&
     queen.includes(mark) && queen.includes('fill="' + api.CARD_THEMES[name].panel + '"'),
@@ -118,6 +118,8 @@ for (const [name, [edge, accent, mark]] of Object.entries(expectedThemes)) {
 
 
 check(new Set(themeSamples).size === 7, 'all seven card themes render visibly different artwork and backgrounds');
+check(api.cardSvg('10|♥').includes('font-size="13"') && api.cardSvg('A|♠').includes('font-size="42"'), 'ten and ace corner/center symbols are enlarged for phone readability');
+check(html.includes('flex:0 0 58px') && html.includes('overflow-x:auto'), 'hand cards keep a readable minimum width and scroll horizontally on narrow screens');
 // Auto mode must follow board size, while explicit choices override it.
 els.np = Object.assign(mk(), { value: '4' });
 els.cl = Object.assign(mk(), { value: 'Green' });
