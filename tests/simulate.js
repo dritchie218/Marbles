@@ -98,6 +98,14 @@ check(jokerCard.includes('JOKER') && jokerCard.includes('viewBox="0 0 60 84"'),
 check(html.includes('flex:0 0 clamp(54px') && html.includes('overflow-x:auto'),
   'hand cards remain readable and horizontally scroll on narrow screens');
 
+
+check(aceCard.includes('font-size="40"'), 'ace center suit is enlarged for quick recognition');
+check(tenCard.includes('font-size="15"') && tenCard.includes('font-size="12"'), 'number cards use larger pips and corner ranks');
+check(queenCard.includes('font-size="27"') && queenCard.includes('font-size="13"'), 'face cards use larger central rank and suit');
+check(jokerCard.includes('font-size="9"') && jokerCard.includes('font-size="14"'), 'Joker label and corner marker are enlarged');
+check(html.includes('flex:0 0 clamp(64px,calc((100vw - 48px)/5),88px)') && html.includes('min-height:112px'),
+  'hand cards are larger on phones while retaining horizontal scrolling');
+
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
 console.log('All checks passed');
 
