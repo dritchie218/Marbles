@@ -14,7 +14,7 @@ global.setTimeout = () => 0;
 const api = new Function(js + `
 return {init,render,mate,side,ctl,moves,step,fin,ai,act,second,forced,pick,abs,tk,tp,A,
   setPegs(o,v){pegs[o]=v.slice()}, setHand(p,h){hands[p]=h.slice()}, setTurn(p){turn=p}, setStuck(p,n){stuck[p]=n}, setForcedCard(p,i){forcedCard[p]=i},
-  setSetup(v){setup=v}, get s(){return {NP,T,E,Y,over,turn,pend,pegs,hands,msg,sel,forcedCard}}}`)();
+  setSetup(v){setup=v}, get s(){return {NP,T,E,Y,over,turn,pend,pegs,hands,msg,sel,forcedCard}}, get cards(){return {deck:deck.slice(),disc:disc.slice(),hands:hands.map(h=>h.slice())}}, fill, setDeck(v){deck=v.slice()}, setDisc(v){disc=v.slice()}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
@@ -26,6 +26,47 @@ const start = (np, teams = true) => {
   api.setSetup(false); api.init();
   return api.s;
 };
+
+// --- deck creation, randomization, and in-game recycle ---
+rngSeed = 0x12345678;
+s = start(4, false);
+const initialCards = api.cards;
+const allInitialCards = [...initialCards.deck, ...initialCards.disc, ...initialCards.hands.flat()];
+const expectedPack = [];
+for (let k = 0; k < 3; k++) {
+  for (const suit of ['♠', '♥', '♦', '♣'])
+    for (const rank of ['A','2','3','4','5','6','7','8','9','10','J','Q','K']) expectedPack.push(rank + '|' + suit);
+  expectedPack.push('JK|r', 'JK|b');
+}
+check(allInitialCards.length === 162 && new Set(allInitialCards).size === 54 &&
+  allInitialCards.every(card => expectedPack.includes(card)) &&
+  expectedPack.every(card => allInitialCards.filter(x => x === card).length === 3),
+  'new game: fresh 162-card deck contains three standard packs and six Jokers');
+check(initialCards.hands.reduce((n, h) => n + h.length, 0) === 21 &&
+  initialCards.hands[0].length === 6 && initialCards.hands.slice(1).every(h => h.length === 5) &&
+  initialCards.deck.length === 141 && initialCards.disc.length === 0,
+  'new game: deals five cards to each player and one extra to the starting player');
+const canonicalPack = expectedPack.join(',');
+check(initialCards.deck.join(',') !== canonicalPack,
+  'new game: draw pile is shuffled rather than left in pack order');
+api.setDisc(['2|♠', '4|♥', '6|♦', '8|♣']);
+api.setDeck([]);
+rngSeed = 0x87654321;
+const handSizeBeforeRecycle = api.cards.hands[0].length;
+api.fill(0, handSizeBeforeRecycle + 1);
+const recycled = api.cards;
+check(recycled.disc.length === 0 && recycled.deck.length === 3 &&
+  recycled.hands[0].length === handSizeBeforeRecycle + 1,
+  'mid-game exhaustion: discard pile is recycled, one card drawn, and discard cleared');
+check(recycled.deck.join(',') !== '2|♠,4|♥,6|♦,8|♣' &&
+  [...recycled.deck, recycled.hands[0].at(-1)].length === 4,
+  'mid-game exhaustion: recycled discard cards are shuffled before drawing');
+const firstShuffle = initialCards.deck.join(',');
+rngSeed = 0x0badcafe;
+start(4, false);
+check(api.cards.disc.length === 0 && api.cards.deck.length === 141 &&
+  api.cards.deck.join(',') !== firstShuffle,
+  'starting another game resets the discard pile and independently reshuffles a fresh deck');
 
 // --- who is on which team ---
 start(4);
