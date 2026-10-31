@@ -107,6 +107,19 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   const gameStarted = process.hrtime.bigint();
   console.log(`[SIM] Game ${games}/60 START — players=${np}, teams=${tm}, mix=${w.join('')}`);
   let n = 0, failure = null;
+  // Instrument game activity so a long game can be distinguished from a stalled one.
+  const activity = {turns: Array(Number(np)).fill(0), discards: 0, cardPlays: 0,
+    marbleMoves: 0, homeEntries: 0, lastBoardChange: 0, lastHomeEntry: 0};
+  let lastBoard = JSON.stringify(api.s.pegs);
+  let lastHomeCount = api.s.pegs.flat().filter(v => v > api.s.E).length;
+  const boardMetrics = () => {
+    const z = api.s, board = JSON.stringify(z.pegs);
+    const homes = z.pegs.flat().filter(v => v > z.E).length;
+    if (board !== lastBoard) { activity.marbleMoves++; activity.lastBoardChange = n; lastBoard = board; }
+    if (homes > lastHomeCount) { activity.homeEntries += homes - lastHomeCount; activity.lastHomeEntry = n; }
+    lastHomeCount = homes;
+  };
+  const STALL_WINDOW = 100000;
   // Keep a bounded recent-state window: an unbounded Map can consume huge memory
   // on long games. Exact game-state repeats inside this window indicate a loop.
   const seenStates = new Set();
@@ -119,6 +132,8 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
   const details = reason => {
     const z = api.s;
     return {np,teams:tm,who:w,game:g,turn:z.turn,steps:n,reason,
+      activity,stepsSinceBoardChange:n-activity.lastBoardChange,
+      stepsSinceHomeEntry:n-activity.lastHomeEntry,
       stuck:z.stuck,forcedCard:z.forcedCard,pegs:z.pegs,
       hands:z.hands.map(h=>h.map(c=>c.split('|')[0]))};
   };
@@ -132,8 +147,16 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
       seenStates.delete(stateOrder.shift());
     }
     n++;
+    activity.turns[s.turn]++;
     if (!api.hu(s.turn)) {
+      const before = JSON.stringify(api.s.pegs);
+      const handBefore = api.s.hands[s.turn].length;
       api.ai();
+      if (JSON.stringify(api.s.pegs) !== before) activity.cardPlays++;
+      else if (api.s.hands[s.turn].length < handBefore) activity.discards++;
+      boardMetrics();
+      if (n % 100000 === 0) console.log(`[SIM] Game ${games}/60 heartbeat — steps=${n}; moves=${activity.marbleMoves}; discards=${activity.discards}; homeEntries=${activity.homeEntries}; noBoardChange=${n-activity.lastBoardChange}; noHomeEntry=${n-activity.lastHomeEntry}`);
+      if (n-activity.lastBoardChange >= STALL_WINDOW) { failure = `stall detected: no board movement for ${STALL_WINDOW} steps`; break; }
       if (api.s.over) break;
       continue;
     }
@@ -143,17 +166,28 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
     const h = s.hands[s.turn], i = h.findIndex((c, ci) => (s.forcedCard[s.turn] == null || ci === s.forcedCard[s.turn]) && api.moves(s.turn, c).length);
     if (i < 0) {
       if (s.stuck[s.turn] >= 3 && s.forcedCard[s.turn] != null) { failure = 'forced draw was assigned but no legal entry move exists'; break; }
+      const before = api.s.hands[s.turn].length;
       api.forced(s.turn, Math.random() * h.length | 0);
+      if (api.s.hands[s.turn].length < before) activity.discards++;
+      boardMetrics();
+      if (n % 100000 === 0) console.log(`[SIM] Game ${games}/60 heartbeat — steps=${n}; moves=${activity.marbleMoves}; discards=${activity.discards}; homeEntries=${activity.homeEntries}; noBoardChange=${n-activity.lastBoardChange}; noHomeEntry=${n-activity.lastHomeEntry}`);
+      if (n-activity.lastBoardChange >= STALL_WINDOW) { failure = `stall detected: no board movement for ${STALL_WINDOW} steps`; break; }
       if (api.s.over) break;
       continue;
     }
     const ms = api.moves(s.turn, h[i]);
+    const before = JSON.stringify(api.s.pegs);
     api.act(s.turn, i, ms[Math.random() * ms.length | 0]);
+    activity.cardPlays++;
+    boardMetrics();
+    if (n % 100000 === 0) console.log(`[SIM] Game ${games}/60 heartbeat — steps=${n}; moves=${activity.marbleMoves}; discards=${activity.discards}; homeEntries=${activity.homeEntries}; noBoardChange=${n-activity.lastBoardChange}; noHomeEntry=${n-activity.lastHomeEntry}`);
+    if (n-activity.lastBoardChange >= STALL_WINDOW) { failure = `stall detected: no board movement for ${STALL_WINDOW} steps`; break; }
     if (api.s.over) break;
     const p = api.s.pend;
     if (p) {
       const l = api.second(p), b = l[Math.random() * l.length | 0];
       api.step(b.o, b.k, b.to);
+      boardMetrics();
       if (api.s.over) break;
       api.fin(api.s.turn, p.ci);
       if (api.s.over) break;
@@ -165,9 +199,9 @@ for (const [np, tm, w] of mixes) for (let g = 0; g < 12; g++) {
     unfinished++;
     const diagnostic = details(failure);
     unfinishedDetails.push(diagnostic);
-    console.log(`[SIM] Game ${games}/60 FAIL — ${failure}; steps=${n}; elapsed=${elapsedMs.toFixed(0)}ms; turn=${diagnostic.turn}`);
+    console.log(`[SIM] Game ${games}/60 FAIL — ${failure}; steps=${n}; elapsed=${elapsedMs.toFixed(0)}ms; turn=${diagnostic.turn}; activity=${JSON.stringify(activity)}; stepsSinceBoardChange=${n-activity.lastBoardChange}; stepsSinceHomeEntry=${n-activity.lastHomeEntry}`);
   } else {
-    console.log(`[SIM] Game ${games}/60 PASS — winner=${api.s.msg}; steps=${n}; elapsed=${elapsedMs.toFixed(0)}ms`);
+    console.log(`[SIM] Game ${games}/60 PASS — winner=${api.s.msg}; steps=${n}; elapsed=${elapsedMs.toFixed(0)}ms; activity=${JSON.stringify(activity)}`);
   }
   console.log(`[SIM] Progress: ${games}/60 games processed; ${games - unfinished}/${games} completed; ${unfinished} failed`);
 }
