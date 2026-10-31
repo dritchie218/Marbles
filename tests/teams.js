@@ -106,7 +106,7 @@ if (safeGreenFirst) {
 api.setPegs(0, [s.E + 1, s.Y, s.Y, s.Y, s.Y]);
 api.setPegs(2, [25, s.Y, s.Y, s.Y, s.Y]);
 sevenMoves = api.moves(0, '7|♠');
-const goldFirst = sevenMoves.find(m => m.o === 2 && m.to === 26 && m.rem?.n === 6);
+const goldFirst = sevenMoves.find(m => m.o === 2 && m.to === 31 && m.rem?.n === 1);
 check(!!goldFirst, '7 split: teammate can move six when own safe-lane marble can finish one');
 if (goldFirst) {
   api.setPegs(2, [26, s.Y, s.Y, s.Y, s.Y]);
