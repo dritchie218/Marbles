@@ -14,6 +14,7 @@ global.setTimeout = () => 0;
 const api = new Function(js + `
 return {init,render,tp,W,A,moves,act,ai,forced,second,step,fin,setSpeed,speedDelay,speedDuration,cardSvg,activeCardTheme,CARD_THEMES,
   get speed(){return moveSpeed},
+  get winner(){return {title:winnerTitle,names:winnerNames,players:winnerPlayers.slice()}},
   get s(){return {NP,T,E,CI,over,turn,pend,hands,pegs,SD,N,stuck,forcedCard}}}`)();
 
 let failed = 0;
@@ -131,3 +132,18 @@ check(api.activeCardTheme() === 'fantasy' && api.cardSvg('K|♣').includes('#765
 
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
 console.log('All checks passed');
+
+
+// --- end-of-game winner announcement ---
+check(html.includes('<div id="boardWrap">') && html.includes('id="winner" role="status" aria-live="assertive"'),
+  'winner announcement is layered over the existing board and announced accessibly');
+check(html.includes('id="winnerTitle"') && html.includes('id="winnerNames"') &&
+  html.includes('onclick="newGame()">New Game</button>'),
+  'winner overlay identifies the winner and offers a new-game action');
+check(html.includes("if(over){$('winnerTitle').textContent=winnerTitle;$('winnerNames').textContent=winnerNames}"),
+  'winner overlay content is populated when the game ends');
+check(api.s.over && api.winner.title && api.winner.names && api.winner.players.length > 0,
+  'completed simulated game records a visible winner and winning player names');
+check(els.winner.hidden === false && els.winnerTitle.textContent === api.winner.title &&
+  els.winnerNames.textContent === api.winner.names,
+  'completed game renders the winner announcement over the board');
