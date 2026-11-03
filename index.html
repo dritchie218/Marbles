@@ -83,12 +83,12 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
 
 /* iPhone landscape play layout: preserve the radial board and existing controls. */
 #rotateNotice{display:none}
-@media screen and (orientation:landscape) and (max-height:600px) and (max-width:1000px){
+@media screen and (orientation:landscape) and (max-height:900px) and (max-width:1800px){
   html,body{width:100%;height:100%;overflow:hidden}
   #app{
     box-sizing:border-box;width:100%;max-width:none;height:100vh;height:100dvh;
     margin:0;padding:4px max(8px,env(safe-area-inset-right,0px)) 4px max(8px,env(safe-area-inset-left,0px));
-    display:grid;grid-template-columns:minmax(0,1fr) minmax(390px,1.08fr);
+    display:grid;grid-template-columns:minmax(0,1.15fr) minmax(340px,.95fr);
     grid-template-rows:auto auto auto auto auto auto auto minmax(108px,auto) minmax(0,1fr);
     grid-template-areas:
       "board title"
@@ -117,8 +117,8 @@ details summary{min-height:42px;display:flex;align-items:center;font-size:16px}
   #st{grid-area:status;font-size:13px;line-height:1.2;min-height:0;margin:0}
   #dc{grid-area:discard;margin:0;padding:3px 6px;font-size:11px;max-height:48px;overflow:auto}
   #dc .sr{margin:1px 0;min-height:18px}
-  #hand{grid-area:hand;min-width:0;min-height:0;gap:5px;padding:3px 1px;align-items:stretch;overflow-x:auto;overflow-y:hidden}
-  .card{flex:0 0 clamp(54px,calc((100% - 25px)/6),70px);min-width:54px;min-height:0;height:100%;max-height:116px;padding:3px 2px}
+  #hand{grid-area:hand;min-width:0;min-height:0;gap:5px;padding:3px 1px;align-items:stretch;justify-content:flex-start;overflow:hidden}
+  .card{flex:1 1 0;min-width:0;max-width:78px;min-height:0;height:100%;max-height:116px;padding:3px 2px}
   .card svg{width:100%;max-width:66px;max-height:82px}
   .card small{font-size:10px;line-height:1.05}
   .card.on{transform:translateY(-2px)}
