@@ -164,8 +164,8 @@ check(html.includes('id="rotateNotice"') && html.includes('Turn your iPhone side
   'portrait phones receive a clear rotate-to-landscape prompt');
 check(html.includes('orientation:landscape') && html.includes('orientation:portrait'),
   'responsive layout switches between landscape gameplay and portrait rotate prompt');
-check(html.includes('#hand{grid-area:hand') && html.includes('overflow:hidden') && html.includes('.card{flex:1 1 0;min-width:0'),
-  'landscape hand fits all cards without horizontal scrolling');
+check(html.includes('#hand{grid-area:hand') && html.includes('.card{flex:0 0 clamp(54px'),
+  'landscape hand keeps cards visible in a horizontally scrollable row');
 
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
 console.log('All checks passed');
