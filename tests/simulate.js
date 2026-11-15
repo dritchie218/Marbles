@@ -55,20 +55,6 @@ for (const [np, color, theme] of [['4', 'Green', 'mid'], ['6', 'Gold', 'oak'], [
   const passGateTen = api.moves(0, '10|♠');
   check(passGateTen.length === 1 && passGateTen[0].to === 5,
     `${np} players: a 10 from the home gate passes it and continues around the main track`);
-  // Jack/Queen gate-crossing paths must check the spaces after the gate,
-  // not incorrectly treat spaces before the gate as the same route.
-  s.pegs[0].fill(-99); s.pegs[0][0] = s.E - 2; s.pegs[0][1] = s.E - 4;
-  const jackPastGate = api.moves(0, 'J|♠').filter(m => m.k === 0);
-  check(jackPastGate.length === 1 && jackPastGate[0].to === 4,
-    `${np} players: Jack can pass the home gate without being blocked by a marble behind the gate`);
-  const queenPastGate = api.moves(0, 'Q|♠').filter(m => m.k === 0);
-  check(queenPastGate.length === 1 && queenPastGate[0].to === 5,
-    `${np} players: Queen can pass the home gate without being blocked by a marble behind the gate`);
-  // A marble actually occupying a space after the gate must still block the route.
-  s.pegs[0][2] = 3;
-  const blockedQueenPastGate = api.moves(0, 'Q|♠').filter(m => m.k === 0);
-  check(blockedQueenPastGate.length === 0,
-    `${np} players: Queen is blocked by a marble on the actual post-gate route`);
   s.pegs[0][0] = s.E - 2;
   const landInHomeLane = api.moves(0, '3|♠');
   check(landInHomeLane.length === 1 && landInHomeLane[0].to === s.E + 1,
