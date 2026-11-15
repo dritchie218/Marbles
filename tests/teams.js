@@ -311,7 +311,8 @@ for (let g = 0; g < 60; g++) {
   let t = 0;
   while (!api.s.over && t++ < 20000) {
     if (api.s.turn === 0) {
-      const h = api.s.hands[0], ci = h.findIndex(c => api.moves(0, c).length);
+      // After three discards only the newly drawn card may be played (same as the real UI / simulate.js).
+      const h = api.s.hands[0], fc = api.s.forcedCard[0], ci = h.findIndex((c, i) => (fc == null || i === fc) && api.moves(0, c).length);
       if (ci < 0) api.forced(0, 0);
       else {
         api.act(0, ci, api.moves(0, h[ci])[0]);
