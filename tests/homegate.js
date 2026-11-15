@@ -13,10 +13,11 @@ const mk = () => ({ value: '4', checked: false, innerHTML: '', textContent: '', 
 global.document = { getElementById: id => els[id] || (els[id] = mk()) };
 global.setTimeout = () => 0;
 const api = new Function(js + `
-return {init,render,moves,act,step,pick,tap,go,abs,A,val,
+return {init,render,moves,act,step,pick,tap,go,abs,A,val,begin,noMoves,second,
   setPegs(o,v){pegs[o]=v.slice()}, setHand(p,h){hands[p]=h.slice()}, setTurn(p){turn=p}, setSetup(v){setup=v},
+  setStuck(p,n){stuck[p]=n}, setForcedCard(p,i){forcedCard[p]=i},
   get history(){return gameHistory},
-  get s(){return {NP,T,E,Y,pegs,hands,selPeg,turn,msg,moveNotice,trailFX}}}`)();
+  get s(){return {NP,T,E,Y,pegs,hands,selPeg,turn,msg,moveNotice,trailFX,forcedCard}}}`)();
 
 let failed = 0;
 const check = (ok, msg) => { console.log((ok ? 'PASS ' : 'FAIL ') + msg); if (!ok) failed++; };
@@ -149,6 +150,51 @@ for (const np of [4, 6]) {
   api.setPegs(1, [-2, Y, Y, Y, Y]);
   const tgt = at(1, 0, -2);
   check(api.moves(0, 'JK|♠').some(m => m.o === 0 && m.to === tgt), 'Joker: an opponent at their relative -2 can be targeted');
+}
+
+// --- a teammate occupying their home gate cannot be landed on, by any kind of move ---
+for (const np of [4, 6]) {
+  const tag = `${np} players:`;
+  const s = start(np, true), { E, Y } = s;
+  const mateSeat = 2;
+  // Teammate has one marble on their home gate and one on the hole Green would land on.
+  const setup = (greenPegs, mateTarget) => {
+    for (let p = 0; p < s.NP; p++) api.setPegs(p, [Y, Y, Y, Y, Y]);
+    api.setPegs(0, greenPegs);
+    api.setPegs(mateSeat, [at(0, mateSeat, mateTarget), E, Y, Y, Y]);
+    api.setStuck(0, 0); api.setForcedCard(0, null); api.setTurn(0);
+  };
+  // Bring-out onto a teammate on your start hole while the teammate occupies their home gate.
+  setup([Y, Y, Y, Y, Y], 0);
+  check(['A', 'K', 'Q', 'J'].every(r => !api.moves(0, r + '|♠').some(m => m.out)),
+    `${tag} A/K/Q/J cannot bring a marble out onto a teammate who occupies their home gate`);
+  // Same, but the teammate's home gate is free: bring-out is legal and sends the teammate to their gate.
+  for (let p = 0; p < s.NP; p++) api.setPegs(p, [Y, Y, Y, Y, Y]);
+  api.setPegs(mateSeat, [at(0, mateSeat, 0), Y, Y, Y, Y]);
+  api.setHand(0, ['K|♠']);
+  const okOut = api.moves(0, 'K|♠').find(m => m.out);
+  check(!!okOut, `${tag} bring-out onto a teammate is legal when their home gate is free`);
+  if (okOut) { api.act(0, 0, okOut); check(api.s.pegs[mateSeat][0] === E, `${tag} that teammate goes to their home gate`); }
+  // Fourth-card forced entry blocked by the same rule: no forced card is assigned, so the player can discard.
+  setup([Y, Y, Y, Y, Y], 0);
+  api.setHand(0, ['2|♠', '3|♠', '4|♠', '5|♠', '6|♠']); api.setStuck(0, 3);
+  api.begin();
+  check(api.s.forcedCard[0] == null && api.moves(0, api.s.hands[0][5]).length === 0 && api.noMoves(),
+    `${tag} fourth card: blocked entry is not forced, so the player can discard instead of getting stuck`);
+  // Normal move onto the teammate marble that sits ON their home gate.
+  for (let p = 0; p < s.NP; p++) api.setPegs(p, [Y, Y, Y, Y, Y]);
+  const mateGateAbsRel = ((api.abs(mateSeat, E) - api.A(0)) % s.T + s.T) % s.T;
+  api.setPegs(0, [mateGateAbsRel - 2, Y, Y, Y, Y]); api.setPegs(mateSeat, [E, Y, Y, Y, Y]);
+  check(!api.moves(0, '2|♠').some(m => m.to === mateGateAbsRel),
+    `${tag} a normal move cannot land on a teammate sitting on their home gate`);
+  check(!api.moves(0, 'JK|♠').some(m => m.to === mateGateAbsRel),
+    `${tag} a Joker cannot swap onto a teammate sitting on their home gate`);
+  check(!api.moves(0, '7|♠').some(m => m.o === 0 && m.to === mateGateAbsRel),
+    `${tag} a 7 cannot land on a teammate sitting on their home gate`);
+  // Normal move onto a different teammate marble while that teammate occupies their gate.
+  setup([10, Y, Y, Y, Y], 12);
+  check(!api.moves(0, '2|♠').some(m => m.to === 12),
+    `${tag} a normal move cannot land on any teammate marble while that teammate occupies their home gate`);
 }
 
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
